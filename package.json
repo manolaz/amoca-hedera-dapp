@@ -1,7 +1,7 @@
 {
   "name": "hedera-app",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.0.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -10,9 +10,19 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@coinbase/wallet-sdk": "^4.2.4",
+    "@hashgraph/hedera-wallet-connect": "^1.4.2",
+    "@hashgraph/proto": "^2.15.0",
     "@hashgraph/sdk": "^2.56.0",
-    "@reown/appkit": "^1.6.2",
-    "@reown/appkit-adapter-ethers": "^1.6.2",
+    "@reown/appkit": "^1.6.3",
+    "@reown/appkit-core": "^1.6.3",
+    "@walletconnect/modal": "^2.7.0",
+    "@walletconnect/modal-core": "^2.7.0",
+    "@walletconnect/qrcode-modal": "^1.8.0",
+    "@walletconnect/sign-client": "^2.17.3",
+    "@walletconnect/universal-provider": "^2.17.3",
+    "@walletconnect/utils": "^2.17.3",
+    "@walletconnect/web3wallet": "^1.16.1",
     "ethers": "^6.13.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
