@@ -136,15 +136,17 @@ export const InfoList = ({
         </pre>
       </section>
 
-      <section>
-        <h2>Nodes</h2>
-        {nodes.map((node) => (
-          <pre key={node}>
-            {node}
-            <br />
-          </pre>
-        ))}
-      </section>
+      {nodes.length > 0 && (
+        <section>
+          <h2>Nodes</h2>
+          {nodes.map((node) => (
+            <pre key={node}>
+              {node}
+              <br />
+            </pre>
+          ))}
+        </section>
+      )}
     </>
   );
 };

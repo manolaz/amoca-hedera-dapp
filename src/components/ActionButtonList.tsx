@@ -258,6 +258,7 @@ export const ActionButtonList = ({
                 <button
                   onClick={hedera_executeTransaction}
                   disabled={!signedHederaTx}
+                  title="Call hedera_signTransaction first"
                 >
                   hedera_executeTransaction
                 </button>

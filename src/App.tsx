@@ -1,6 +1,6 @@
+import "./App.css";
+import { useState } from "react";
 import { createAppKit } from "@reown/appkit/react";
-
-// import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ActionButtonList } from "./components/ActionButtonList";
 import { InfoList } from "./components/InfoList";
 import {
@@ -9,9 +9,6 @@ import {
   networks,
   universalHederaAdapter,
 } from "./config";
-
-import "./App.css";
-import { useState } from "react";
 import { hederaTestnetNative } from "./lib/adapters/hedera";
 
 // Create modal
@@ -42,15 +39,15 @@ export function App() {
   };
 
   const receiveSignedMsg = (signedMsg: string) => {
-    setSignedMsg(signedMsg); // Update the state with the transaction hash
+    setSignedMsg(signedMsg); // Update the state with the signature
   };
 
   const receivebalance = (balance: string) => {
-    setBalance(balance);
+    setBalance(balance); // Update the state with the balance
   };
 
   const receiveNodes = (nodes: string[]) => {
-    setNodes(nodes);
+    setNodes(nodes); // Update the state with the node addresses
   };
 
   return (
@@ -69,7 +66,6 @@ export function App() {
       </div>
 
       <h1>AppKit EIP-155 & HIP-820 Hedera React dApp Example</h1>
-      {/* <QueryClientProvider client={queryClient}> */}
       <appkit-button balance="hide" />
       <ActionButtonList
         sendHash={receiveHash}
@@ -79,7 +75,6 @@ export function App() {
       />
       <div className="advice">
         <p>
-          This projectId only works on localhost. <br />
           Go to{" "}
           <a
             href="https://cloud.reown.com"
@@ -89,7 +84,7 @@ export function App() {
           >
             Reown Cloud
           </a>{" "}
-          to get your own.
+          to get projectId.
         </p>
       </div>
       <InfoList
