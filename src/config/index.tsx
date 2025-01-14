@@ -6,6 +6,7 @@ import {
   hederaTestnetNative,
   hederaMainnetEvm,
   hederaTestnetEvm,
+  WalletConnectProvider,
 } from "../lib/adapters/hedera";
 
 // Get projectId from https://cloud.reown.com
@@ -30,3 +31,4 @@ export const networks = [
 ] as [AppKitNetwork, ...AppKitNetwork[]];
 
 export const universalHederaAdapter = new UniversalHederaAdapter({ projectId });
+export const universalProvider = await WalletConnectProvider.init({ projectId, metadata, logger: 'debug' });

@@ -33,7 +33,7 @@ export class UniversalHederaAdapter extends AdapterBlueprint {
   constructor(params: ContructorParams) {
     super({
       ...params,
-      namespace: "hedera" as ChainNamespace,
+      namespace: 'hedera' as ChainNamespace,
       networks: [
         hederaMainnetEvm,
         hederaMainnetNative,
@@ -217,7 +217,7 @@ export class UniversalHederaAdapter extends AdapterBlueprint {
       throw new Error("Please configure a namespace");
     }
 
-    const wcProvider = new WalletConnectProvider(options);
+    const wcProvider = options.universalProvider;
     this.provider = wcProvider as unknown as Provider;
     this.addConnector({
       id: "hedera-wallet-connect",

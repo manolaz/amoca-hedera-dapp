@@ -37,32 +37,37 @@ export class WalletConnectProvider extends UniversalProvider {
 
   constructor(opts: UniversalProviderOpts) {
     super(opts);
-    this.init();
   }
-
-  private async init() {
+  static async init(opts: UniversalProviderOpts) {
+    const provider = new WalletConnectProvider(opts);
     //@ts-expect-error - private base method
-    await this.initialize();
-
-    this.namespaces = {
-      ...(this.namespaces?.eip155
+    await provider.initialize();
+    provider.namespaces = {
+      ...(provider.namespaces?.eip155
         ? {
-            eip155: {
-              ...this.namespaces?.eip155,
-              rpcMap: this.optionalNamespaces?.eip155.rpcMap,
-            },
-          }
+          eip155: {
+            ...provider.namespaces?.eip155,
+            rpcMap: provider.optionalNamespaces?.eip155.rpcMap,
+          },
+        }
         : {}),
-      ...(this.namespaces?.hedera
+      ...(provider.namespaces?.hedera
         ? {
-            hedera: {
-              ...this.namespaces?.hedera,
-              rpcMap: this.optionalNamespaces?.hedera.rpcMap,
-            },
-          }
+          hedera: {
+            ...provider.namespaces?.hedera,
+            rpcMap: provider.optionalNamespaces?.hedera.rpcMap,
+          },
+        }
         : {}),
     };
+    return provider;
   }
+  // private async init() {
+  //   //@ts-expect-error - private base method
+  //   await this.initialize();
+
+   
+  // }
 
   emit(event: string, data?: unknown) {
     this.events.emit(event, data);
@@ -311,8 +316,6 @@ export class WalletConnectProvider extends UniversalProvider {
 
   private getProviders(): Record<string, IProvider> {
     if (!this.client) {
-      //@ts-expect-error - initialize is private method
-      this.initialize();
       throw new Error("Sign Client not initialized");
     }
 

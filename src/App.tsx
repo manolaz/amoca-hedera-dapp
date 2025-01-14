@@ -8,12 +8,15 @@ import {
   metadata,
   networks,
   universalHederaAdapter,
+  universalProvider,
 } from "./config";
 import { hederaTestnetNative } from "./lib/adapters/hedera";
 
 // Create modal
 createAppKit({
   adapters: [universalHederaAdapter],
+  // @ts-expect-error - UniversalProvider false positive types error
+  universalProvider,
   defaultNetwork: hederaTestnetNative,
   projectId,
   metadata,
