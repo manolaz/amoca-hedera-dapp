@@ -35,6 +35,7 @@ class Eip155Provider implements IProvider {
     events: EventEmitter;
     namespace: Namespace;
   }) {
+    
     this.namespace = namespace;
     this.events = events;
     this.client = client;
@@ -43,7 +44,7 @@ class Eip155Provider implements IProvider {
   }
 
   public async request<T = unknown>(args: RequestParams): Promise<T> {
-    console.log({ eip155: { args, provider: this } });
+    
     switch (args.request.method) {
       case "eth_requestAccounts":
         return this.getAccounts() as unknown as T;
@@ -68,10 +69,12 @@ class Eip155Provider implements IProvider {
   }
 
   public updateNamespace(namespace: SessionTypes.Namespace) {
+    
     this.namespace = Object.assign(this.namespace, namespace);
   }
 
   public setDefaultChain(chainId: string, rpcUrl?: string | undefined) {
+    
     // http provider exists so just set the chainId
     if (!this.httpProviders[chainId]) {
       this.setHttpProvider(parseInt(chainId), rpcUrl);
@@ -84,10 +87,12 @@ class Eip155Provider implements IProvider {
   }
 
   public requestAccounts(): string[] {
+    
     return this.getAccounts();
   }
 
   public getDefaultChain(): string {
+    
     if (this.chainId) return this.chainId.toString();
     if (this.namespace.defaultChain) return this.namespace.defaultChain;
 
@@ -103,6 +108,7 @@ class Eip155Provider implements IProvider {
     chainId: number,
     rpcUrl?: string | undefined,
   ): JsonRpcProvider | undefined {
+    if (!chainId) return undefined;
     const caipNetwork = [hederaMainnetEvm, hederaTestnetEvm].find(
       (network) => network.id == chainId,
     );
@@ -115,6 +121,7 @@ class Eip155Provider implements IProvider {
   }
 
   private setHttpProvider(chainId: number, rpcUrl?: string): void {
+    
     const http = this.createHttpProvider(chainId, rpcUrl);
     if (http) {
       this.httpProviders[chainId] = http;
@@ -122,6 +129,7 @@ class Eip155Provider implements IProvider {
   }
 
   private createHttpProviders(): RpcProvidersMap {
+    
     const http: Record<number, JsonRpcProvider> = {};
     this.namespace.chains.forEach((chain) => {
       const parsedChain = parseInt(getChainId(chain));
@@ -134,6 +142,7 @@ class Eip155Provider implements IProvider {
   }
 
   private getAccounts(): string[] {
+    
     const accounts = this.namespace.accounts;
     if (!accounts) {
       return [];
@@ -152,6 +161,7 @@ class Eip155Provider implements IProvider {
   }
 
   private getHttpProvider(): JsonRpcProvider {
+    
     const chain = this.chainId;
     const http = this.httpProviders[chain];
     if (typeof http === "undefined") {
@@ -161,6 +171,7 @@ class Eip155Provider implements IProvider {
   }
 
   private async handleSwitchChain(args: RequestParams) {
+    
     let hexChainId = args.request.params
       ? (args.request.params as { chainId: string }[])[0]?.chainId
       : "0x0";
@@ -193,11 +204,13 @@ class Eip155Provider implements IProvider {
   }
 
   private isChainApproved(chainId: number): boolean {
+    
     return this.namespace.chains.includes(`${this.name}:${chainId}`);
   }
 
   private async getCapabilities(args: RequestParams) {
     // if capabilities are stored in the session, return them, else send the request to the wallet
+    
 
     const address = (args.request?.params as string[] | undefined)?.[0];
     if (!address)
@@ -233,6 +246,7 @@ class Eip155Provider implements IProvider {
   }
 
   private async getCallStatus(args: RequestParams) {
+    
     const session = this.client.session.get(args.topic);
     const bundlerName = session.sessionProperties?.bundler_name;
     if (bundlerName) {
@@ -271,6 +285,7 @@ class Eip155Provider implements IProvider {
     bundlerUrl: string,
     args: RequestParams,
   ) {
+    
     const url = new URL(bundlerUrl);
     const response = await fetch(url, {
       method: "POST",
@@ -292,6 +307,7 @@ class Eip155Provider implements IProvider {
   }
 
   private getBundlerUrl(cap2ChainId: string, bundlerName: string) {
+    
     return `${BUNDLER_URL}?projectId=${this.client.core.projectId}&chainId=${cap2ChainId}&bundler=${bundlerName}`;
   }
 }

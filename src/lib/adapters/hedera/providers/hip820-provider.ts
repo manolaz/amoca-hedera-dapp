@@ -9,7 +9,7 @@ import {
 } from "@walletconnect/universal-provider";
 import { SessionTypes } from "@walletconnect/types";
 import EventEmitter from "events";
-import { AccountBalance, AccountId, Transaction } from "@hashgraph/sdk";
+import { AccountId, Transaction } from "@hashgraph/sdk";
 
 class HIP820Provider implements IProvider {
   events: EventEmitter;
@@ -68,9 +68,6 @@ class HIP820Provider implements IProvider {
     ];
   }
 
-  getAccountBalance(topicId: string): Promise<AccountBalance> {
-    return this.getSigner(topicId).getAccountBalance();
-  }
 
   setDefaultChain(chainId: string): void {
     this.chainId = chainId;

@@ -1,13 +1,17 @@
 import { AppKitNetwork } from "@reown/appkit/networks";
 
 import {
-  UniversalHederaAdapter,
   hederaMainnetNative,
   hederaTestnetNative,
   hederaMainnetEvm,
   hederaTestnetEvm,
-  WalletConnectProvider,
+  HederaWalletConnectProvider,
 } from "../lib/adapters/hedera";
+import { HederaAdapter } from '../lib/adapters/hedera/adapter';
+import { ChainNamespace } from '@reown/appkit-common';
+
+
+export const hederaNamespace = "hedera" as ChainNamespace;
 
 // Get projectId from https://cloud.reown.com
 export const projectId = import.meta.env.VITE_REOWN_PROJECT_ID;
@@ -30,5 +34,22 @@ export const networks = [
   hederaTestnetNative,
 ] as [AppKitNetwork, ...AppKitNetwork[]];
 
-export const universalHederaAdapter = new UniversalHederaAdapter({ projectId });
-export const universalProvider = await WalletConnectProvider.init({ projectId, metadata, logger: 'debug' });
+export const nativeHederaAdapter = new HederaAdapter({
+  projectId, 
+  networks: [
+    hederaMainnetNative,
+    hederaTestnetNative,
+  ], 
+  namespace: hederaNamespace
+});
+
+export const eip155HederaAdapter = new HederaAdapter({
+  projectId,
+  networks: [
+    hederaMainnetEvm,
+    hederaTestnetEvm,
+  ],
+  namespace: 'eip155'
+});
+
+export const universalProvider = await HederaWalletConnectProvider.init({ projectId, metadata, logger: 'debug' });

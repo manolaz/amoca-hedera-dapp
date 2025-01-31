@@ -2,14 +2,13 @@ import { useEffect, useState } from "react";
 import {
   useAppKitState,
   useAppKitTheme,
-  useAppKitEvents,
   useAppKitAccount,
   useWalletInfo,
   useAppKitProvider,
   useAppKitNetworkCore,
 } from "@reown/appkit/react";
 import { BrowserProvider } from "ethers";
-import { WalletConnectProvider } from "../lib/adapters/hedera";
+import { HederaWalletConnectProvider } from "../lib/adapters/hedera";
 
 interface InfoListProps {
   hash: string;
@@ -32,14 +31,10 @@ export const InfoList = ({
   const state = useAppKitState();
   const { chainId } = useAppKitNetworkCore();
   const { address, caipAddress, isConnected, status } = useAppKitAccount();
-  const events = useAppKitEvents();
   const walletInfo = useWalletInfo();
-  const { walletProvider } = useAppKitProvider<WalletConnectProvider>("eip155");
+  const { walletProvider } = useAppKitProvider<HederaWalletConnectProvider>("eip155");
   const isEthChain = state.activeChain == "eip155";
 
-  useEffect(() => {
-    console.log("Events: ", events);
-  }, [events]);
 
   useEffect(() => {
     const checkTransactionStatus = async () => {
@@ -75,9 +70,19 @@ export const InfoList = ({
       )}
       {hash && isEthChain && (
         <section>
-          <h2>Sign Tx</h2>
+          <h2>Transaction</h2>
           <pre>
-            Hash: {hash}
+            Hash:{" "}
+            <a
+              href={`https://hashscan.io/${
+                state.selectedNetworkId?.toString() == "eip155:296"
+                  ? "testnet/"
+                  : ""
+              }transaction/${hash}`}
+              target="_blank"
+            >
+              {hash}
+            </a>
             <br />
             Status: {statusEthTx}
             <br />
