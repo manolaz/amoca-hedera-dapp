@@ -32,13 +32,12 @@ export const InfoList = ({
   const { chainId } = useAppKitNetworkCore();
   const { address, caipAddress, isConnected, status } = useAppKitAccount();
   const walletInfo = useWalletInfo();
-  const { walletProvider } = useAppKitProvider<HederaWalletConnectProvider>("eip155");
+  const { walletProvider } =
+    useAppKitProvider<HederaWalletConnectProvider>("eip155");
   const isEthChain = state.activeChain == "eip155";
-
 
   useEffect(() => {
     const checkTransactionStatus = async () => {
-      
       if (!walletProvider) return;
       if (isEthChain && hash) {
         try {
@@ -48,8 +47,8 @@ export const InfoList = ({
             receipt?.status === 1
               ? "Success"
               : receipt?.status === 0
-              ? "Failed"
-              : "Pending",
+                ? "Failed"
+                : "Pending",
           );
         } catch (err) {
           console.error("Error checking transaction status:", err);
@@ -60,7 +59,7 @@ export const InfoList = ({
 
     checkTransactionStatus();
   }, [hash, walletProvider, chainId, state.activeChain, txId, isEthChain]);
-  
+
   return (
     <>
       {balance && (

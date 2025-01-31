@@ -87,7 +87,7 @@ export const ActionButtonList = ({
   const { activeChain } = useAppKitState();
   const [signedHederaTx, setSignedHederaTx] = useState<HederaTransaction>();
   const [signedEthTx, setSignedEthTx] = useState<string>();
-  
+
   const { walletProvider } = useAppKitProvider(activeChain ?? hederaNamespace);
   const handleDisconnect = async () => {
     try {
@@ -138,7 +138,7 @@ export const ActionButtonList = ({
     };
 
     const { signatureMap } = await walletProvider.hedera_signMessage(params);
-    
+
     window.alert("Signed message: " + signatureMap);
     sendSignMsg(signatureMap);
   };
@@ -160,7 +160,9 @@ export const ActionButtonList = ({
     });
     window.alert(
       "Signed transaction: " +
-        JSON.stringify((transactionSigned as HederaTransaction).getSignatures()),
+        JSON.stringify(
+          (transactionSigned as HederaTransaction).getSignatures(),
+        ),
     );
     setSignedHederaTx(transactionSigned as HederaTransaction);
   };

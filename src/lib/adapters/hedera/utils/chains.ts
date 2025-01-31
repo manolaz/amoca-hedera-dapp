@@ -1,12 +1,16 @@
 import { WcHelpersUtil } from "@reown/appkit";
-import { CaipNetwork, CaipNetworkId, ChainNamespace } from "@reown/appkit-common";
+import {
+  CaipNetwork,
+  CaipNetworkId,
+  ChainNamespace,
+} from "@reown/appkit-common";
 import { defineChain } from "@reown/appkit/networks";
 import { Namespace, NamespaceConfig } from "@walletconnect/universal-provider";
 import { HederaJsonRpcMethod } from "@hashgraph/hedera-wallet-connect";
 
 const assets = {
   imageId: undefined,
-  imageUrl: '/hedera.svg'
+  imageUrl: "/hedera.svg",
 };
 
 export const hederaMainnetNative = defineChain({
@@ -31,7 +35,7 @@ export const hederaMainnetNative = defineChain({
     },
   },
   testnet: false,
-  assets
+  assets,
 });
 
 export const hederaTestnetNative = defineChain({
@@ -56,7 +60,7 @@ export const hederaTestnetNative = defineChain({
     },
   },
   testnet: true,
-  assets
+  assets,
 });
 
 export const hederaTestnetEvm = defineChain({
@@ -81,7 +85,7 @@ export const hederaTestnetEvm = defineChain({
     },
   },
   testnet: true,
-  assets
+  assets,
 });
 
 export const hederaMainnetEvm = defineChain({
@@ -106,39 +110,39 @@ export const hederaMainnetEvm = defineChain({
     },
   },
   testnet: false,
-  assets
+  assets,
 });
 
 // Support Hedera Networks
 export function createNamespaces(caipNetworks: CaipNetwork[]): NamespaceConfig {
   return caipNetworks.reduce<NamespaceConfig>((acc, chain) => {
-    const { id, chainNamespace, rpcUrls } = chain
-    const rpcUrl = rpcUrls.default.http[0]
+    const { id, chainNamespace, rpcUrls } = chain;
+    const rpcUrl = rpcUrls.default.http[0];
 
-    const methods = chainNamespace == 'hedera' as ChainNamespace
-      ? Object.values(HederaJsonRpcMethod)
-      : WcHelpersUtil.getMethodsByChainNamespace(chainNamespace)
+    const methods =
+      chainNamespace == ("hedera" as ChainNamespace)
+        ? Object.values(HederaJsonRpcMethod)
+        : WcHelpersUtil.getMethodsByChainNamespace(chainNamespace);
 
     if (!acc[chainNamespace]) {
       acc[chainNamespace] = {
         methods,
-        events: ['accountsChanged', 'chainChanged'],
+        events: ["accountsChanged", "chainChanged"],
         chains: [],
-        rpcMap: {}
-      } satisfies Namespace
+        rpcMap: {},
+      } satisfies Namespace;
     }
 
-    const caipNetworkId = `${chainNamespace}:${id}`
+    const caipNetworkId = `${chainNamespace}:${id}`;
 
+    const namespace = acc[chainNamespace] as Namespace;
 
-    const namespace = acc[chainNamespace] as Namespace
-
-    namespace.chains.push(caipNetworkId)
+    namespace.chains.push(caipNetworkId);
 
     if (namespace?.rpcMap && rpcUrl) {
-      namespace.rpcMap[id] = rpcUrl
+      namespace.rpcMap[id] = rpcUrl;
     }
 
-    return acc
-  }, {})
+    return acc;
+  }, {});
 }

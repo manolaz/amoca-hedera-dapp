@@ -57,7 +57,9 @@ function merge<T extends ProposalTypes.RequiredNamespaces>(
  * @param transaction - Any instance of a class that extends `Transaction`
  * @returns Base64 encoded representation of the input `Transaction` object
  */
-export function transactionToBase64String<T extends Transaction>(transaction: T): string {
-  const transactionBytes = transaction.toBytes()
-  return Buffer.from(transactionBytes).toString('base64');
+export function transactionToBase64String<T extends Transaction>(
+  transaction: T,
+): string {
+  const transactionBytes = transaction.toBytes();
+  return Buffer.from(transactionBytes).toString("base64");
 }

@@ -7,9 +7,8 @@ import {
   hederaTestnetEvm,
   HederaWalletConnectProvider,
 } from "../lib/adapters/hedera";
-import { HederaAdapter } from '../lib/adapters/hedera/adapter';
-import { ChainNamespace } from '@reown/appkit-common';
-
+import { HederaAdapter } from "../lib/adapters/hedera/adapter";
+import { ChainNamespace } from "@reown/appkit-common";
 
 export const hederaNamespace = "hedera" as ChainNamespace;
 
@@ -35,21 +34,19 @@ export const networks = [
 ] as [AppKitNetwork, ...AppKitNetwork[]];
 
 export const nativeHederaAdapter = new HederaAdapter({
-  projectId, 
-  networks: [
-    hederaMainnetNative,
-    hederaTestnetNative,
-  ], 
-  namespace: hederaNamespace
+  projectId,
+  networks: [hederaMainnetNative, hederaTestnetNative],
+  namespace: hederaNamespace,
 });
 
 export const eip155HederaAdapter = new HederaAdapter({
   projectId,
-  networks: [
-    hederaMainnetEvm,
-    hederaTestnetEvm,
-  ],
-  namespace: 'eip155'
+  networks: [hederaMainnetEvm, hederaTestnetEvm],
+  namespace: "eip155",
 });
 
-export const universalProvider = await HederaWalletConnectProvider.init({ projectId, metadata, logger: 'debug' });
+export const universalProvider = await HederaWalletConnectProvider.init({
+  projectId,
+  metadata,
+  logger: "debug",
+});

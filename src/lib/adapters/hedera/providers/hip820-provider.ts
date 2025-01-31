@@ -68,7 +68,6 @@ class HIP820Provider implements IProvider {
     ];
   }
 
-
   setDefaultChain(chainId: string): void {
     this.chainId = chainId;
     this.namespace.defaultChain = chainId;

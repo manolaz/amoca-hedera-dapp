@@ -15,10 +15,7 @@ import { hederaTestnetNative } from "./lib/adapters/hedera";
 
 // Create modal
 createAppKit({
-  adapters: [
-    nativeHederaAdapter,
-    eip155HederaAdapter
-  ],
+  adapters: [nativeHederaAdapter, eip155HederaAdapter],
   // @ts-expect-error - UniversalProvider false positive types error
   universalProvider,
   defaultNetwork: hederaTestnetNative,
@@ -45,7 +42,7 @@ export function App() {
   const receiveHash = (hash: string) => {
     setTransactionHash(hash); // Update the state with the transaction hash
   };
-  
+
   const receiveTxId = (hash: string) => {
     setTransactionId(hash); // Update the state with the transaction id
   };
