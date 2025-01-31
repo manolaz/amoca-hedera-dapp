@@ -12,7 +12,7 @@ import {
   parseUnits,
 } from "ethers";
 import { HederaWalletConnectConnector } from "./wallet-connect-connector";
-import { EthersMethods, getAccountInfo } from "./utils";
+import { getAccountInfo } from "./utils";
 import { HederaWalletConnectProvider } from "./providers";
 
 type UniversalProvider = Parameters<
@@ -287,15 +287,17 @@ export class HederaAdapter extends AdapterBlueprint {
     const walletCapabilitiesString =
       provider.session?.sessionProperties?.["capabilities"];
     if (walletCapabilitiesString) {
-      const walletCapabilities = EthersMethods.parseWalletCapabilities(
-        walletCapabilitiesString,
-      );
-      const accountCapabilities = walletCapabilities[params];
-      if (accountCapabilities) {
-        return accountCapabilities;
+      try {
+        const walletCapabilities = JSON.parse(walletCapabilitiesString)
+        const accountCapabilities = walletCapabilities[params];
+        if (accountCapabilities) {
+          return accountCapabilities;
+        }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (error) {
+        throw new Error('Error parsing wallet capabilities')
       }
     }
-
     return await provider.request({
       method: "wallet_getCapabilities",
       params: [params],
