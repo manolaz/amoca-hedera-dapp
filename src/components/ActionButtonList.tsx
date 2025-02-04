@@ -1,30 +1,28 @@
 import {
   useDisconnect,
-  useAppKit,
-  useAppKitNetwork,
   useAppKitAccount,
   useAppKitNetworkCore,
   useAppKitState,
+  useAppKitProvider,
 } from "@reown/appkit/react";
 import {
   BrowserProvider,
-  JsonRpcSigner,
+  // JsonRpcSigner,
   formatEther,
+  JsonRpcSigner,
   parseEther,
+  Wallet,
 } from "ethers";
 import {
-  hederaTestnetNative as hederaNativeTestnet,
   transactionToBase64String,
-  WalletConnectProvider,
+  HederaWalletConnectProvider,
 } from "../lib/adapters/hedera";
-import { hederaTestnet as hederaTestnetEvm } from "@reown/appkit/networks";
 import { useState } from "react";
-import { ChainNamespace } from "@reown/appkit-common";
 import {
   AccountInfo,
   AccountInfoQuery,
   Hbar,
-  Transaction,
+  Transaction as HederaTransaction,
   TransactionId,
   TransferTransaction,
 } from "@hashgraph/sdk";
@@ -33,10 +31,39 @@ import {
   SignAndExecuteQueryParams,
   SignMessageParams,
 } from "@hashgraph/hedera-wallet-connect";
-import { universalHederaAdapter } from "../config";
+import { hederaNamespace } from "../config";
+// import { universalHederaAdapter } from "../config";
+
+// Example receiver addresses
 
 const testEthReceiver = "0xE53F9824319B891CD4D6050dBF2b242Be7e13344";
 const testNativeReceiver = "0.0.4848542";
+
+// Example types, and message (EIP-712)
+
+const types = {
+  Person: [
+    { name: "name", type: "string" },
+    { name: "wallet", type: "address" },
+  ],
+  Mail: [
+    { name: "from", type: "Person" },
+    { name: "to", type: "Person" },
+    { name: "contents", type: "string" },
+  ],
+};
+
+const message = {
+  from: {
+    name: "Alice",
+    wallet: Wallet.createRandom().address, // example address
+  },
+  to: {
+    name: "Bob",
+    wallet: Wallet.createRandom().address, // example address
+  },
+  contents: "Hello, Bob!",
+};
 
 interface ActionButtonListProps {
   sendHash: (hash: string) => void;
@@ -55,13 +82,13 @@ export const ActionButtonList = ({
   sendNodeAddresses,
 }: ActionButtonListProps) => {
   const { disconnect } = useDisconnect();
-  const { open } = useAppKit();
   const { chainId } = useAppKitNetworkCore();
   const { isConnected, address } = useAppKitAccount();
-  const { switchNetwork } = useAppKitNetwork();
   const { activeChain } = useAppKitState();
-  const [signedHederaTx, setSignedHederaTx] = useState<Transaction>();
+  const [signedHederaTx, setSignedHederaTx] = useState<HederaTransaction>();
+  const [signedEthTx, setSignedEthTx] = useState<string>();
 
+  const { walletProvider } = useAppKitProvider(activeChain ?? hederaNamespace);
   const handleDisconnect = async () => {
     try {
       await disconnect();
@@ -73,13 +100,15 @@ export const ActionButtonList = ({
   // --- HIP-820 ---
 
   const getwalletProvider = () => {
-    if (!universalHederaAdapter || !address)
-      throw Error("user is disconnected");
-    return universalHederaAdapter.walletConnectProvider as WalletConnectProvider;
+    if (!walletProvider) throw Error("user is disconnected");
+    return walletProvider as HederaWalletConnectProvider;
   };
+
   const hedera_getNodeAddresses = async () => {
     const walletProvider = getwalletProvider();
     const result = await walletProvider.hedera_getNodeAddresses();
+
+    window.alert("Node addresses: " + JSON.stringify(result.nodes));
     sendNodeAddresses(result.nodes);
   };
 
@@ -95,6 +124,8 @@ export const ActionButtonList = ({
       transactionList,
     });
     setSignedHederaTx(undefined);
+
+    window.alert("Transaction Id: " + result.transactionId);
     sendTxId(result.transactionId);
   };
 
@@ -102,20 +133,20 @@ export const ActionButtonList = ({
     const walletProvider = getwalletProvider();
 
     const params: SignMessageParams = {
-      signerAccountId:
-        "hedera:testnet:" + walletProvider.getAccountAddresses()[0],
+      signerAccountId: "hedera:testnet:" + address,
       message: "Test Message for AppKit Example",
     };
 
     const { signatureMap } = await walletProvider.hedera_signMessage(params);
 
+    window.alert("Signed message: " + signatureMap);
     sendSignMsg(signatureMap);
   };
 
   const hedera_signTransaction = async () => {
     const walletProvider = getwalletProvider();
 
-    const accountId = walletProvider.getAccountAddresses()[0];
+    const accountId = address!;
     const hbarAmount = new Hbar(Number(1));
     const transaction = new TransferTransaction()
       .setTransactionId(TransactionId.generate(accountId!))
@@ -124,24 +155,25 @@ export const ActionButtonList = ({
       .addHbarTransfer(testNativeReceiver, hbarAmount);
 
     const transactionSigned = await walletProvider.hedera_signTransaction({
-      signerAccountId:
-        "hedera:testnet:" + walletProvider.getAccountAddresses()[0],
+      signerAccountId: "hedera:testnet:" + address,
       transactionBody: transaction,
     });
     window.alert(
-      "transactionSigned: " +
-        JSON.stringify((transactionSigned as Transaction).getSignatures()),
+      "Signed transaction: " +
+        JSON.stringify(
+          (transactionSigned as HederaTransaction).getSignatures(),
+        ),
     );
-    setSignedHederaTx(transactionSigned as Transaction);
+    setSignedHederaTx(transactionSigned as HederaTransaction);
   };
 
   const hedera_signAndExecuteQuery = async () => {
     const walletProvider = getwalletProvider();
-    const accountId = walletProvider.getAccountAddresses()[0];
+    const accountId = address!;
     const query = new AccountInfoQuery().setAccountId(accountId);
 
     const params: SignAndExecuteQueryParams = {
-      signerAccountId: "hedera:testnet:" + accountId.toString(),
+      signerAccountId: "hedera:testnet:" + accountId,
       query: queryToBase64String(query),
     };
 
@@ -155,7 +187,7 @@ export const ActionButtonList = ({
   const hedera_signAndExecuteTransaction = async () => {
     const walletProvider = getwalletProvider();
 
-    const accountId = walletProvider.getAccountAddresses()[0];
+    const accountId = address!;
     const hbarAmount = new Hbar(Number(1));
     const transaction = new TransferTransaction()
       .setTransactionId(TransactionId.generate(accountId!))
@@ -163,13 +195,13 @@ export const ActionButtonList = ({
       .addHbarTransfer(testNativeReceiver, hbarAmount);
 
     const result = await walletProvider.hedera_signAndExecuteTransaction({
-      signerAccountId:
-        "hedera:testnet:" + walletProvider.getAccountAddresses()[0],
+      signerAccountId: "hedera:testnet:" + accountId,
       transactionList: transactionToBase64String(transaction),
     });
-
+    window.alert("Transaction Id: " + result.transactionId);
     sendTxId(result.transactionId);
   };
+
   // --- EIP-155 ---
 
   // function to send a tx
@@ -185,7 +217,7 @@ export const ActionButtonList = ({
       value: parseEther("1"), // 1 Hbar
       gasLimit: 1_000_000,
     });
-
+    window.alert("Transaction hash: " + tx.hash);
     sendHash(tx.hash);
   };
 
@@ -197,8 +229,71 @@ export const ActionButtonList = ({
     const provider = new BrowserProvider(walletProvider, chainId);
     const signer = new JsonRpcSigner(provider, address);
     const sig = await signer?.signMessage("Hello Reown AppKit!");
-
+    window.alert("Message signature: " + sig);
     sendSignMsg(sig);
+  };
+
+  // function to sign a tx
+  const eth_signTransaction = async () => {
+    const walletProvider = getwalletProvider();
+    if (!address) throw Error("user is disconnected");
+
+    const provider = new BrowserProvider(walletProvider, chainId);
+    const signer = new JsonRpcSigner(provider, address);
+
+    const txData = {
+      to: testEthReceiver,
+      value: parseEther("1"),
+      gasLimit: 1_000_000,
+    };
+    const rawSignedTx = await signer.signTransaction(txData);
+
+    window.alert("Signed transaction: " + rawSignedTx);
+    // You might send this rawSignedTx back to your server or store it
+    setSignedEthTx(rawSignedTx);
+  };
+
+  // send raw signed transaction
+  const eth_sendRawTransaction = async () => {
+    if (!signedEthTx) throw Error("No raw transaction found!");
+
+    const walletProvider = getwalletProvider();
+    if (!address) throw Error("user is disconnected");
+
+    const provider = new BrowserProvider(walletProvider, chainId);
+    // Broadcast the raw signed transaction to the network
+    const txHash = await provider.send("eth_sendRawTransaction", [signedEthTx]);
+
+    window.alert("Transaction hash: " + txHash);
+    setSignedEthTx(undefined);
+    sendHash(txHash);
+  };
+
+  // function to sign typed data
+  const eth_signTypedData = async () => {
+    const walletProvider = getwalletProvider();
+    if (!address) {
+      throw Error("user is disconnected");
+    }
+
+    // Prepare Ethers signers
+    const provider = new BrowserProvider(walletProvider, chainId);
+    const signer = new JsonRpcSigner(provider, address);
+
+    // Sign typed data
+    try {
+      const domain = {
+        name: "Reown AppKit",
+        version: "1",
+        chainId,
+        verifyingContract: Wallet.createRandom().address, // example address
+      };
+      const signature = await signer.signTypedData(domain, types, message);
+      window.alert("Typed data signature: " + signature);
+      sendSignMsg(signature);
+    } catch (err) {
+      alert("Error signing typed data:" + err);
+    }
   };
 
   // function to get the balance
@@ -208,27 +303,24 @@ export const ActionButtonList = ({
     const provider = new BrowserProvider(walletProvider, chainId);
     const balance = await provider.getBalance(address);
     const hbar = formatEther(balance);
-    sendBalance(`${hbar} HBAR`);
+
+    window.alert(`Balance: ${hbar}ℏ`);
+    sendBalance(`${hbar}ℏ`);
   };
+
   return (
     <div>
+      <div className="appkit-buttons">
+        <appkit-button />
+        {isConnected && (
+          <>
+            <appkit-network-button />
+            <button onClick={handleDisconnect}>Disconnect</button>
+          </>
+        )}
+      </div>
       {isConnected ? (
         <>
-          <div>
-            <button onClick={() => open()}>Open</button>
-            <button onClick={handleDisconnect}>Disconnect</button>
-            <button
-              onClick={() =>
-                switchNetwork(
-                  activeChain == "eip155"
-                    ? hederaNativeTestnet
-                    : hederaTestnetEvm,
-                )
-              }
-            >
-              Switch Network
-            </button>
-          </div>
           {activeChain == "eip155" && (
             <>
               <div>
@@ -236,15 +328,26 @@ export const ActionButtonList = ({
                 <strong>EIP-155 Methods:</strong>
               </div>
               <div>
+                <button onClick={eth_getBalance}>eth_getBalance</button>
                 <button onClick={eth_signMessage}>eth_signMessage</button>
+                <button onClick={eth_signTransaction}>
+                  eth_signTransaction
+                </button>
+                <button
+                  onClick={eth_sendRawTransaction}
+                  disabled={!signedEthTx}
+                  title="Call eth_signTransaction first"
+                >
+                  eth_sendRawTransaction
+                </button>
                 <button onClick={eth_sendTransaction}>
                   eth_sendTransaction
                 </button>
-                <button onClick={eth_getBalance}>eth_getBalance</button>
+                <button onClick={eth_signTypedData}>eth_signTypedData</button>
               </div>
             </>
           )}
-          {activeChain == ("hedera" as ChainNamespace) && (
+          {activeChain == hederaNamespace && (
             <>
               <div>
                 <br />

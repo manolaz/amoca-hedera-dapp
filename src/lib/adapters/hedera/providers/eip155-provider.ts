@@ -43,7 +43,6 @@ class Eip155Provider implements IProvider {
   }
 
   public async request<T = unknown>(args: RequestParams): Promise<T> {
-    console.log({ eip155: { args, provider: this } });
     switch (args.request.method) {
       case "eth_requestAccounts":
         return this.getAccounts() as unknown as T;
@@ -103,6 +102,7 @@ class Eip155Provider implements IProvider {
     chainId: number,
     rpcUrl?: string | undefined,
   ): JsonRpcProvider | undefined {
+    if (!chainId) return undefined;
     const caipNetwork = [hederaMainnetEvm, hederaTestnetEvm].find(
       (network) => network.id == chainId,
     );

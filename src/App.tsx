@@ -7,14 +7,15 @@ import {
   projectId,
   metadata,
   networks,
-  universalHederaAdapter,
+  nativeHederaAdapter,
+  eip155HederaAdapter,
   universalProvider,
 } from "./config";
 import { hederaTestnetNative } from "./lib/adapters/hedera";
 
 // Create modal
 createAppKit({
-  adapters: [universalHederaAdapter],
+  adapters: [nativeHederaAdapter, eip155HederaAdapter],
   // @ts-expect-error - UniversalProvider false positive types error
   universalProvider,
   defaultNetwork: hederaTestnetNative,
@@ -41,7 +42,7 @@ export function App() {
   const receiveHash = (hash: string) => {
     setTransactionHash(hash); // Update the state with the transaction hash
   };
-  
+
   const receiveTxId = (hash: string) => {
     setTransactionId(hash); // Update the state with the transaction id
   };
@@ -74,7 +75,7 @@ export function App() {
       </div>
 
       <h1>AppKit EIP-155 & HIP-820 Hedera React dApp Example</h1>
-      <appkit-button balance="hide" />
+
       <ActionButtonList
         sendHash={receiveHash}
         sendTxId={receiveTxId}
