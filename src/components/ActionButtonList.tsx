@@ -7,7 +7,6 @@ import {
 } from '@reown/appkit/react'
 import {
   BrowserProvider,
-  // JsonRpcSigner,
   formatEther,
   JsonRpcSigner,
   parseEther,
@@ -53,11 +52,11 @@ const types = {
 const message = {
   from: {
     name: 'Alice',
-    wallet: Wallet.createRandom().address, // example address
+    wallet: Wallet.createRandom().address,
   },
   to: {
     name: 'Bob',
-    wallet: Wallet.createRandom().address, // example address
+    wallet: Wallet.createRandom().address,
   },
   contents: 'Hello, Bob!',
 }
@@ -67,7 +66,6 @@ interface ActionButtonListProps {
   sendTxId: (id: string) => void
   sendSignMsg: (hash: string) => void
   sendBalance: (balance: string) => void
-
   sendNodeAddresses: (nodes: string[]) => void
 }
 
@@ -146,7 +144,7 @@ export const ActionButtonList = ({
     const accountId = address!
     const hbarAmount = new Hbar(Number(1))
     const transaction = new TransferTransaction()
-      .setTransactionId(TransactionId.generate(accountId!))
+      .setTransactionId(TransactionId.generate(accountId))
       .setMaxTransactionFee(new Hbar(Number(1)))
       .addHbarTransfer(accountId.toString()!, hbarAmount.negated())
       .addHbarTransfer(testNativeReceiver, hbarAmount)
@@ -157,7 +155,7 @@ export const ActionButtonList = ({
     })
     window.alert(
       'Signed transaction: ' +
-        JSON.stringify((transactionSigned as HederaTransaction).getSignatures()),
+      JSON.stringify((transactionSigned as HederaTransaction).getSignatures()),
     )
     setSignedHederaTx(transactionSigned as HederaTransaction)
   }
@@ -183,7 +181,7 @@ export const ActionButtonList = ({
     const accountId = address!
     const hbarAmount = new Hbar(Number(1))
     const transaction = new TransferTransaction()
-      .setTransactionId(TransactionId.generate(accountId!))
+      .setTransactionId(TransactionId.generate(accountId))
       .addHbarTransfer(accountId.toString()!, hbarAmount.negated())
       .addHbarTransfer(testNativeReceiver, hbarAmount)
 
@@ -242,7 +240,7 @@ export const ActionButtonList = ({
     const rawSignedTx = await signer.signTransaction(txData)
 
     window.alert('Signed transaction: ' + rawSignedTx)
-    // You might send this rawSignedTx back to your server or store it
+
     setSignedEthTx(rawSignedTx)
   }
 
@@ -279,7 +277,7 @@ export const ActionButtonList = ({
         name: 'Reown AppKit',
         version: '1',
         chainId,
-        verifyingContract: Wallet.createRandom().address, // example address
+        verifyingContract: Wallet.createRandom().address,
       }
       const signature = await signer.signTypedData(domain, types, message)
       window.alert('Typed data signature: ' + signature)
@@ -289,16 +287,226 @@ export const ActionButtonList = ({
     }
   }
 
-  // function to get the balance
-  const eth_getBalance = async () => {
-    const walletProvider = getwalletProvider()
-    if (!address) throw Error('user is disconnected')
-    const provider = new BrowserProvider(walletProvider, chainId)
-    const balance = await provider.getBalance(address)
-    const hbar = formatEther(balance)
+  // ------------------ Additional EIP-155 JSON-RPC Test Methods ------------------
 
-    window.alert(`Balance: ${hbar}ℏ`)
-    sendBalance(`${hbar}ℏ`)
+  // Returns current account balance
+  const eth_getBalance = async () => {
+    const provider = getwalletProvider()
+    if (!address) throw Error('User is disconnected')
+    const browserProvider = new BrowserProvider(provider, chainId)
+    const balance = await browserProvider.getBalance(address)
+    const formatted = formatEther(balance)
+    window.alert(`Balance: ${formatted}ℏ`)
+    sendBalance(`${formatted}ℏ`)
+  }
+
+  // Returns the latest block number
+  const eth_blockNumber = async () => {
+    const provider = getwalletProvider()
+    const bn = await provider.eth_blockNumber()
+    window.alert('eth_blockNumber: ' + bn)
+  }
+
+  // Executes a simple call (dummy data)
+  const eth_call = async () => {
+    const provider = getwalletProvider()
+    const result = await provider.eth_call({ to: testEthReceiver, data: '0x' })
+    window.alert('eth_call result: ' + JSON.stringify(result))
+  }
+
+  // Returns fee history for last 5 blocks (empty reward percentiles)
+  const eth_feeHistory = async () => {
+    const provider = getwalletProvider()
+    const history = await provider.eth_feeHistory(5, 'latest', [])
+    window.alert('eth_feeHistory: ' + JSON.stringify(history))
+  }
+
+  // Returns current gas price
+  const eth_gasPrice = async () => {
+    const provider = getwalletProvider()
+    const price = await provider.eth_gasPrice()
+    window.alert('eth_gasPrice: ' + price)
+  }
+
+  // Returns contract code at given address (using current account address as dummy)
+  const eth_getCode = async () => {
+    const provider = getwalletProvider()
+    if (!address) throw Error('User is disconnected')
+    const code = await provider.eth_getCode(address, 'latest')
+    window.alert('eth_getCode: ' + code)
+  }
+
+  // Returns block details by hash. First fetch latest block by number, then use its hash.
+  const eth_getBlockByHash = async () => {
+    const provider = getwalletProvider()
+    const block = await provider.eth_getBlockByNumber('latest', false) as { hash: string }
+    const result = await provider.eth_getBlockByHash(block.hash, false)
+    window.alert('eth_getBlockByHash: ' + JSON.stringify(result))
+  }
+
+  // Returns block details by number (using "latest")
+  const eth_getBlockByNumber = async () => {
+    const provider = getwalletProvider()
+    const result = await provider.eth_getBlockByNumber('latest', false)
+    window.alert('eth_getBlockByNumber: ' + JSON.stringify(result))
+  }
+
+  // Returns transaction count in a block by hash
+  const eth_getBlockTransactionCountByHash = async () => {
+    const provider = getwalletProvider()
+    const block = await provider.eth_getBlockByNumber('latest', false) as { hash: string }
+    const count = await provider.eth_getBlockTransactionCountByHash(block.hash)
+    window.alert('eth_getBlockTransactionCountByHash: ' + count)
+  }
+
+  // Returns transaction count in a block by number
+  const eth_getBlockTransactionCountByNumber = async () => {
+    const provider = getwalletProvider()
+    const count = await provider.eth_getBlockTransactionCountByNumber('latest')
+    window.alert('eth_getBlockTransactionCountByNumber: ' + count)
+  }
+
+  // Returns filter logs for a dummy filter (using current address as filter)
+  const eth_getFilterLogs = async () => {
+    const provider = getwalletProvider()
+    const filter = { address: address, fromBlock: 'latest', toBlock: 'latest' }
+    const logs = await provider.eth_getFilterLogs(filter)
+    window.alert('eth_getFilterLogs: ' + JSON.stringify(logs))
+  }
+
+  // Returns filter changes for a dummy filterId ("0x1")
+  const eth_getFilterChanges = async () => {
+    const provider = getwalletProvider()
+    const changes = await provider.eth_getFilterChanges('0x1')
+    window.alert('eth_getFilterChanges: ' + JSON.stringify(changes))
+  }
+
+  // Returns logs for a dummy filter (using current address)
+  const eth_getLogs = async () => {
+    const provider = getwalletProvider()
+    const filter = { address: address, fromBlock: 'latest', toBlock: 'latest' }
+    const logs = await provider.eth_getLogs(filter)
+    window.alert('eth_getLogs: ' + JSON.stringify(logs))
+  }
+
+  // Returns storage at a dummy position ("0x0") for current address
+  const eth_getStorageAt = async () => {
+    const provider = getwalletProvider()
+    const storage = await provider.eth_getStorageAt(address!, '0x0', 'latest')
+    window.alert('eth_getStorageAt: ' + storage)
+  }
+
+  // Returns a transaction from a block by hash and index (dummy index "0x0")
+  const eth_getTransactionByBlockHashAndIndex = async () => {
+    const provider = getwalletProvider()
+    const block = await provider.eth_getBlockByNumber('latest', false) as { hash: string };
+    const tx = await provider.eth_getTransactionByBlockHashAndIndex(block.hash, '0x0')
+    window.alert('eth_getTransactionByBlockHashAndIndex: ' + JSON.stringify(tx))
+  }
+
+  // Returns a transaction from a block by number and index (dummy index "0x0")
+  const eth_getTransactionByBlockNumberAndIndex = async () => {
+    const provider = getwalletProvider()
+    const tx = await provider.eth_getTransactionByBlockNumberAndIndex('latest', '0x0')
+    window.alert('eth_getTransactionByBlockNumberAndIndex: ' + JSON.stringify(tx))
+  }
+
+  // Returns transaction details by hash (using hash from signed raw transaction if available)
+  const eth_getTransactionByHash = async () => {
+    const provider = getwalletProvider()
+    if (!signedEthTx) return window.alert('No signed transaction hash available')
+    const tx = await provider.eth_getTransactionByHash(signedEthTx)
+    window.alert('eth_getTransactionByHash: ' + JSON.stringify(tx))
+  }
+
+  // Returns transaction count for current address
+  const eth_getTransactionCount = async () => {
+    const provider = getwalletProvider()
+    const count = await provider.eth_getTransactionCount(address!, 'latest')
+    window.alert('eth_getTransactionCount: ' + count)
+  }
+
+  // Returns transaction receipt for a given hash (using signedEthTx if available)
+  const eth_getTransactionReceipt = async () => {
+    const provider = getwalletProvider()
+    if (!signedEthTx) return window.alert('No signed transaction hash available')
+    const receipt = await provider.eth_getTransactionReceipt(signedEthTx)
+    window.alert('eth_getTransactionReceipt: ' + JSON.stringify(receipt))
+  }
+
+  // Returns maxPriorityFeePerGas
+  const eth_maxPriorityFeePerGas = async () => {
+    const provider = getwalletProvider()
+    const fee = await provider.eth_maxPriorityFeePerGas()
+    window.alert('eth_maxPriorityFeePerGas: ' + fee)
+  }
+
+  // Returns mining status (should be false)
+  const eth_mining = async () => {
+    const provider = getwalletProvider()
+    const mining = await provider.eth_mining()
+    window.alert('eth_mining: ' + mining)
+  }
+
+  // Creates a new block filter and returns its id
+  const eth_newBlockFilter = async () => {
+    const provider = getwalletProvider()
+    const filterId = await provider.eth_newBlockFilter()
+    window.alert('eth_newBlockFilter: ' + filterId)
+  }
+
+  // Creates a new filter (dummy filter) and returns its id
+  const eth_newFilter = async () => {
+    const provider = getwalletProvider()
+    const filter = { address: address, fromBlock: 'latest', toBlock: 'latest' }
+    const filterId = await provider.eth_newFilter(filter)
+    window.alert('eth_newFilter: ' + filterId)
+  }
+
+  // Dummy call to eth_submitWork with zeroed parameters
+  const eth_submitWork = async () => {
+    const provider = getwalletProvider()
+    const result = await provider.eth_submitWork([
+      '0x0000000000000000000000000000000000000000000000000000000000000000',
+      '0x0000000000000000000000000000000000000000000000000000000000000000',
+      '0x0000000000000000000000000000000000000000000000000000000000000000',
+    ])
+    window.alert('eth_submitWork: ' + JSON.stringify(result))
+  }
+
+  // Returns syncing status
+  const eth_syncing = async () => {
+    const provider = getwalletProvider()
+    const syncing = await provider.eth_syncing()
+    window.alert('eth_syncing: ' + JSON.stringify(syncing))
+  }
+
+  // Uninstalls a filter (dummy filter id "0x1")
+  const eth_uninstallFilter = async () => {
+    const provider = getwalletProvider()
+    const result = await provider.eth_uninstallFilter('0x1')
+    window.alert('eth_uninstallFilter: ' + result)
+  }
+
+  // Returns network listening status
+  const net_listening = async () => {
+    const provider = getwalletProvider()
+    const listening = await provider.net_listening()
+    window.alert('net_listening: ' + listening)
+  }
+
+  // Returns current network version
+  const net_version = async () => {
+    const provider = getwalletProvider()
+    const version = await provider.net_version()
+    window.alert('net_version: ' + version)
+  }
+
+  // Returns client version string
+  const web3_clientVersion = async () => {
+    const provider = getwalletProvider()
+    const version = await provider.web3_clientVersion()
+    window.alert('web3_clientVersion: ' + version)
   }
 
   return (
@@ -314,11 +522,11 @@ export const ActionButtonList = ({
       </div>
       {isConnected ? (
         <>
-          {activeChain == 'eip155' && (
+          {activeChain === 'eip155' && (
             <>
               <div>
                 <br />
-                <strong>EIP-155 Methods:</strong>
+                <strong>EIP-155 Methods (Wallet Signing):</strong>
               </div>
               <div>
                 <button onClick={eth_getBalance}>eth_getBalance</button>
@@ -333,10 +541,46 @@ export const ActionButtonList = ({
                 </button>
                 <button onClick={eth_sendTransaction}>eth_sendTransaction</button>
                 <button onClick={eth_signTypedData}>eth_signTypedData</button>
+                <button onClick={eth_blockNumber}>eth_blockNumber</button>
+                <button onClick={eth_call}>eth_call</button>
+                <button onClick={eth_feeHistory}>eth_feeHistory</button>
+                <button onClick={eth_gasPrice}>eth_gasPrice</button>
+                <button onClick={eth_getCode}>eth_getCode</button>
+                <button onClick={eth_getBlockByHash}>eth_getBlockByHash</button>
+                <button onClick={eth_getBlockByNumber}>eth_getBlockByNumber</button>
+                <button onClick={eth_getBlockTransactionCountByHash}>
+                  eth_getBlockTxCountByHash
+                </button>
+                <button onClick={eth_getBlockTransactionCountByNumber}>
+                  eth_getBlockTxCountByNumber
+                </button>
+                <button onClick={eth_getFilterLogs}>eth_getFilterLogs</button>
+                <button onClick={eth_getFilterChanges}>eth_getFilterChanges</button>
+                <button onClick={eth_getLogs}>eth_getLogs</button>
+                <button onClick={eth_getStorageAt}>eth_getStorageAt</button>
+                <button onClick={eth_getTransactionByBlockHashAndIndex}>
+                  eth_getTxByBlockHashAndIndex
+                </button>
+                <button onClick={eth_getTransactionByBlockNumberAndIndex}>
+                  eth_getTxByBlockNumberAndIndex
+                </button>
+                <button onClick={eth_getTransactionByHash}>eth_getTransactionByHash</button>
+                <button onClick={eth_getTransactionCount}>eth_getTransactionCount</button>
+                <button onClick={eth_getTransactionReceipt}>eth_getTransactionReceipt</button>
+                <button onClick={eth_maxPriorityFeePerGas}>eth_maxPriorityFeePerGas</button>
+                <button onClick={eth_mining}>eth_mining</button>
+                <button onClick={eth_newBlockFilter}>eth_newBlockFilter</button>
+                <button onClick={eth_newFilter}>eth_newFilter</button>
+                <button onClick={eth_submitWork}>eth_submitWork</button>
+                <button onClick={eth_syncing}>eth_syncing</button>
+                <button onClick={eth_uninstallFilter}>eth_uninstallFilter</button>
+                <button onClick={net_listening}>net_listening</button>
+                <button onClick={net_version}>net_version</button>
+                <button onClick={web3_clientVersion}>web3_clientVersion</button>
               </div>
             </>
           )}
-          {activeChain == hederaNamespace && (
+          {activeChain === hederaNamespace && (
             <>
               <div>
                 <br />
