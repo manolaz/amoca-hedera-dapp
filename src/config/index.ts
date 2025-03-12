@@ -3,7 +3,9 @@ import {
   HederaProvider,
   HederaAdapter,
   HederaChainDefinition,
+  hederaNamespace,
 } from '@hashgraph/hedera-wallet-connect'
+import UniversalProvider from '@walletconnect/universal-provider'
 
 // Get projectId from https://cloud.reown.com
 export const projectId = import.meta.env.VITE_REOWN_PROJECT_ID
@@ -29,7 +31,7 @@ export const networks = [
 export const nativeHederaAdapter = new HederaAdapter({
   projectId,
   networks: [HederaChainDefinition.Native.Mainnet, HederaChainDefinition.Native.Testnet],
-  namespace: 'hedera',
+  namespace: hederaNamespace,
 })
 
 export const eip155HederaAdapter = new HederaAdapter({
@@ -38,8 +40,8 @@ export const eip155HederaAdapter = new HederaAdapter({
   namespace: 'eip155',
 })
 
-export const universalProvider = await HederaProvider.init({
+export const universalProvider = (await HederaProvider.init({
   projectId,
   metadata,
   logger: 'debug',
-})
+})) as unknown as UniversalProvider // avoid type mismatch error due to missing of private properties in HederaProvider
