@@ -65,7 +65,7 @@ export function App() {
         <img src="/hedera.svg" alt="Hedera" style={{ width: '90px', height: '90px' }} />
       </div>
 
-      <h1>AppKit EIP-155 & HIP-820 Hedera React dApp Example</h1>
+      <h1>Hedera App Example using Reown AppKit and Hedera</h1>
 
       <ActionButtonList
         sendHash={receiveHash}
