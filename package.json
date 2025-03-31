@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --port 5173",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "prettier": "prettier --write .",
@@ -37,9 +37,5 @@
     "typescript-eslint": "^8.26.1",
     "vite": "^6.2.1",
     "vite-plugin-node-polyfills": "^0.23.0"
-  },
-  "resolutions": {
-    "@hashgraph/sdk": "2.60.1",
-    "@walletconnect/universal-provider": "^2.18.0"
   }
 }
