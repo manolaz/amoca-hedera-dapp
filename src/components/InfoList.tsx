@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { BrowserProvider } from 'ethers'
 import {
   useAppKitState,
   useAppKitTheme,
@@ -7,7 +8,6 @@ import {
   useAppKitProvider,
   useAppKitNetworkCore,
 } from '@reown/appkit/react'
-import { BrowserProvider } from 'ethers'
 import { HederaProvider } from '@hashgraph/hedera-wallet-connect'
 
 interface InfoListProps {
@@ -15,7 +15,6 @@ interface InfoListProps {
   txId: string
   signedMsg: string
   balance: string
-
   nodes: string[]
 }
 

@@ -1,7 +1,7 @@
 import './App.css'
 import { useState } from 'react'
+import { hederaTestnet } from '@reown/appkit/networks'
 import { createAppKit } from '@reown/appkit/react'
-import { HederaChainDefinition } from '@hashgraph/hedera-wallet-connect'
 import { ActionButtonList } from './components/ActionButtonList'
 import { InfoList } from './components/InfoList'
 import {
@@ -13,13 +13,18 @@ import {
   universalProvider,
 } from './config'
 
+// create an adapter
+
 // Create modal
 createAppKit({
   adapters: [nativeHederaAdapter, eip155HederaAdapter],
+  // adapters: [new EthersAdapter()],
   universalProvider,
-  defaultNetwork: HederaChainDefinition.Native.Testnet,
+  // defaultNetwork: HederaChainDefinition.EVM.Testnet,
+  defaultNetwork: hederaTestnet,
   projectId,
   metadata,
+  // networks: [hederaTestnet],
   networks,
   themeMode: 'light' as const,
   features: {
@@ -38,26 +43,6 @@ export function App() {
   const [balance, setBalance] = useState('')
   const [nodes, setNodes] = useState<string[]>([])
 
-  const receiveHash = (hash: string) => {
-    setTransactionHash(hash) // Update the state with the transaction hash
-  }
-
-  const receiveTxId = (hash: string) => {
-    setTransactionId(hash) // Update the state with the transaction id
-  }
-
-  const receiveSignedMsg = (signedMsg: string) => {
-    setSignedMsg(signedMsg) // Update the state with the signature
-  }
-
-  const receivebalance = (balance: string) => {
-    setBalance(balance) // Update the state with the balance
-  }
-
-  const receiveNodes = (nodes: string[]) => {
-    setNodes(nodes) // Update the state with the node addresses
-  }
-
   return (
     <div className="pages">
       <div className="logos">
@@ -65,14 +50,14 @@ export function App() {
         <img src="/hedera.svg" alt="Hedera" style={{ width: '90px', height: '90px' }} />
       </div>
 
-      <h1>AppKit EIP-155 & HIP-820 Hedera React dApp Example</h1>
+      <h1>Hedera App Example using Reown AppKit and Hedera</h1>
 
       <ActionButtonList
-        sendHash={receiveHash}
-        sendTxId={receiveTxId}
-        sendSignMsg={receiveSignedMsg}
-        sendBalance={receivebalance}
-        sendNodeAddresses={receiveNodes}
+        sendHash={setTransactionHash}
+        sendTxId={setTransactionId}
+        sendSignMsg={setSignedMsg}
+        sendBalance={setBalance}
+        sendNodeAddresses={setNodes}
       />
       <div className="advice">
         <p>
