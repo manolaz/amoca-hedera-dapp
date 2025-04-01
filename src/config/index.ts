@@ -24,6 +24,7 @@ export const metadata = {
 export const networks = [
   HederaChainDefinition.Native.Mainnet,
   HederaChainDefinition.Native.Testnet,
+  //should be same as import {hedera, hederaTestnet}from '@reown/appkit/networks'
   HederaChainDefinition.EVM.Mainnet,
   HederaChainDefinition.EVM.Testnet,
 ] as [AppKitNetwork, ...AppKitNetwork[]]

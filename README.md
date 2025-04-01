@@ -2,7 +2,7 @@
 
 This is an example Hedera app that integrates Hedera using either the native Hedera gRPC
 endpoints as well as Ethereum JSON-RPC endpoints. This wallet is designed to be used with the
-ReowReown AppKit. For an example wallet see <https://github.com/hgraph-io/hedera-wallet>.
+Reown AppKit. For an example wallet see <https://github.com/hgraph-io/hedera-wallet>.
 
 ## Getting started
 

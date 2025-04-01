@@ -1,3 +1,5 @@
+import { useState } from 'react'
+import { BrowserProvider, formatEther, JsonRpcSigner, parseEther, Wallet } from 'ethers'
 import { ChainNamespace } from '@reown/appkit-common'
 import {
   useDisconnect,
@@ -6,8 +8,6 @@ import {
   useAppKitState,
   useAppKitProvider,
 } from '@reown/appkit/react'
-import { BrowserProvider, formatEther, JsonRpcSigner, parseEther, Wallet } from 'ethers'
-import { useState } from 'react'
 import {
   AccountInfo,
   AccountInfoQuery,
@@ -147,7 +147,7 @@ export const ActionButtonList = ({
     })
     window.alert(
       'Signed transaction: ' +
-      JSON.stringify((transactionSigned as HederaTransaction).getSignatures()),
+        JSON.stringify((transactionSigned as HederaTransaction).getSignatures()),
     )
     setSignedHederaTx(transactionSigned as HederaTransaction)
   }
@@ -235,9 +235,8 @@ export const ActionButtonList = ({
       window.alert('Signed transaction: ' + rawSignedTx)
 
       setSignedEthTx(rawSignedTx)
-    }
-    catch (e) {
-      console.error(e);
+    } catch (e) {
+      console.error(e)
     }
   }
 
@@ -249,16 +248,15 @@ export const ActionButtonList = ({
       const walletProvider = getWalletProvider()
       if (!address) throw Error('user is disconnected')
 
-    const provider = new BrowserProvider(walletProvider, chainId)
-    // Broadcast the raw signed transaction to the network
-    const txHash = await provider.send('eth_sendRawTransaction', [signedEthTx])
+      const provider = new BrowserProvider(walletProvider, chainId)
+      // Broadcast the raw signed transaction to the network
+      const txHash = await provider.send('eth_sendRawTransaction', [signedEthTx])
 
       window.alert('Transaction hash: ' + txHash)
       setSignedEthTx(undefined)
       sendHash(txHash)
-    }
-    catch (e) {
-      console.error(e);
+    } catch (e) {
+      console.error(e)
     }
   }
 
@@ -341,7 +339,7 @@ export const ActionButtonList = ({
   // Returns block details by hash. First fetch latest block by number, then use its hash.
   const eth_getBlockByHash = async () => {
     const provider = getWalletProvider()
-    const block = await provider.eth_getBlockByNumber('latest', false) as { hash: string }
+    const block = (await provider.eth_getBlockByNumber('latest', false)) as { hash: string }
     const result = await provider.eth_getBlockByHash(block.hash, false)
     window.alert('eth_getBlockByHash: ' + JSON.stringify(result))
   }
@@ -356,7 +354,7 @@ export const ActionButtonList = ({
   // Returns transaction count in a block by hash
   const eth_getBlockTransactionCountByHash = async () => {
     const provider = getWalletProvider()
-    const block = await provider.eth_getBlockByNumber('latest', false) as { hash: string }
+    const block = (await provider.eth_getBlockByNumber('latest', false)) as { hash: string }
     const count = await provider.eth_getBlockTransactionCountByHash(block.hash)
     window.alert('eth_getBlockTransactionCountByHash: ' + count)
   }
@@ -401,7 +399,7 @@ export const ActionButtonList = ({
   // Returns a transaction from a block by hash and index (dummy index "0x0")
   const eth_getTransactionByBlockHashAndIndex = async () => {
     const provider = getWalletProvider()
-    const block = await provider.eth_getBlockByNumber('latest', false) as { hash: string };
+    const block = (await provider.eth_getBlockByNumber('latest', false)) as { hash: string }
     const tx = await provider.eth_getTransactionByBlockHashAndIndex(block.hash, '0x0')
     window.alert('eth_getTransactionByBlockHashAndIndex: ' + JSON.stringify(tx))
   }
