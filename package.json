@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "dev": "vite --port 5173",
+    "dev": "vite --port 5173 --force",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "prettier": "prettier --write .",
@@ -14,6 +14,7 @@
     "@hashgraph/hedera-wallet-connect": "file:../hedera-wallet-connect",
     "@hashgraph/sdk": "^2.61.0",
     "@reown/appkit": "^1.7.1",
+    "@reown/appkit-adapter-ethers": "^1.7.1",
     "@reown/appkit-core": "^1.7.1",
     "@walletconnect/sign-client": "^2.19.2",
     "@walletconnect/universal-provider": "^2.19.2",

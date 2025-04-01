@@ -17,13 +17,13 @@ cp .env.example .env
 2. Install dependencies
 
 ```sh
-yarn install
+npm install
 ```
 
 3. Run the app
 
 ```sh
-yarn dev
+npm run dev
 ```
 
 ## EVM vs Hedera native transactions
