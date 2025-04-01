@@ -1,6 +1,9 @@
 import './App.css'
 import { useState } from 'react'
 import { createAppKit } from '@reown/appkit/react'
+import { hedera, hederaTestnet } from '@reown/appkit/networks'
+import { EthersAdapter } from '@reown/appkit-adapter-ethers'
+
 import { HederaChainDefinition } from '@hashgraph/hedera-wallet-connect'
 import { ActionButtonList } from './components/ActionButtonList'
 import { InfoList } from './components/InfoList'
@@ -13,13 +16,18 @@ import {
   universalProvider,
 } from './config'
 
+// create an adapter
+
 // Create modal
 createAppKit({
   adapters: [nativeHederaAdapter, eip155HederaAdapter],
+  // adapters: [new EthersAdapter()],
   universalProvider,
-  defaultNetwork: HederaChainDefinition.Native.Testnet,
+  // defaultNetwork: HederaChainDefinition.EVM.Testnet,
+  defaultNetwork: hederaTestnet,
   projectId,
   metadata,
+  // networks: [hederaTestnet],
   networks,
   themeMode: 'light' as const,
   features: {
