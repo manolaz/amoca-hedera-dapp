@@ -1,8 +1,9 @@
 # Hedera App
 
-This is an example Hedera app that integrates Hedera using either the native Hedera gRPC
-endpoints as well as Ethereum JSON-RPC endpoints. This wallet is designed to be used with the
-Reown AppKit. For an example wallet see <https://github.com/hgraph-io/hedera-wallet>.
+This is an example app that integrates Hedera using both the native Hedera gRPC APIs as
+well as Ethereum JSON-RPC compatible endpoints. This app utilizes
+[Reown AppKit](https://docs.reown.com/appkit/overview). For an example Hedera wallet
+implementation see <https://github.com/hgraph-io/hedera-wallet>.
 
 ## Getting started
 
@@ -26,7 +27,7 @@ npm install
 npm run dev
 ```
 
-## EVM vs Hedera native transactions
+## Key considerations for integrating Hedera
 
 The Hedera network provides gRPC and REST APIs that are consumed by Hedera SDKs and network
 users.
