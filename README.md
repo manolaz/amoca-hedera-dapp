@@ -1,7 +1,7 @@
 # Hedera App
 
-This is an example app that integrates Hedera using both the native Hedera gRPC APIs as
-well as Ethereum JSON-RPC compatible endpoints. This app utilizes
+This is an example app that integrates Hedera using both the native Hedera gRPC APIs as well as
+Ethereum JSON-RPC compatible endpoints. This app utilizes
 [Reown AppKit](https://docs.reown.com/appkit/overview). For an example Hedera wallet
 implementation see <https://github.com/hgraph-io/hedera-wallet>.
 
@@ -33,14 +33,14 @@ The Hedera network provides gRPC and REST APIs that are consumed by Hedera SDKs 
 users.
 
 Hedera supports the Ethereum JSON-RPC spec through a middle layer called the Hedera JSON-RPC
-Relay. This relay is responsible for translating Ethereum JSON-RPC API calls into Hedera gRPC
-API calls. To see a full list of supported methods, refer to
+Relay. This relay is responsible for translating Ethereum JSON-RPC compatible API calls into
+Hedera gRPC and REST API calls. To see a full list of supported methods, refer to
 <https://github.com/hashgraph/hedera-json-rpc-relay/blob/main/docs/rpc-api.md>
 
 Apps and wallets that integrate Hedera can choose to use the Hedera JSON-RPC Relay to interact
-with the network, directly use Hedera APIs and SDKs, or do both. A strong reason to integrate
-Hedera leveraging the Hedera JSON-RPC Relay is to utilize existing tools and libraries available
-in the EVM ecosystem such as Wagmi, Viem, AppKit, and WalletKit.
+with the network, directly use Hedera APIs and SDKs, or do both. A strong reason to leverage the
+Hedera JSON-RPC Relay is to utilize existing tools and libraries available in the EVM ecosystem
+such as Wagmi, Viem, AppKit, and WalletKit.
 
 > [!WARNING]
 >
@@ -51,8 +51,7 @@ in the EVM ecosystem such as Wagmi, Viem, AppKit, and WalletKit.
 > - [Hedera: Ed25519 vs ECDSA](https://docs.hedera.com/hedera/core-concepts/keys-and-signatures#choosing-between-ecdsa-and-ed25519-keys).
 
 A strong reason to integrate Hedera via the native APIs is to fully support all account types
-and native transaction types provided by Hedera. Integrating both approaches allows for the
-broadest compatibility amongst, apps, wallets, and users.
+and native transaction types provided by Hedera.
 
 In the context of Reown's WalletKit and AppKit, this is defined by the namespaces requested by
 apps to wallets. For the EVM compatibility layer, the namespace is `eip155` and for Hedera
