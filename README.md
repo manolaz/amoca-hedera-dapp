@@ -27,7 +27,7 @@ npm install
 npm run dev
 ```
 
-## Key considerations for integrating Hedera
+## Key considerations when integrating Hedera
 
 The Hedera network provides gRPC and REST APIs that are consumed by Hedera SDKs and network
 users.
