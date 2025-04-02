@@ -38,15 +38,18 @@ or interact directly with Hedera APIs through the SDKs or implement both. A stro
 integrate Hedera via the EVM compatibility is to leverage existing tooling and libraries
 available in the EVM ecosystem.
 
-> [!WARNING] If using the EVM namespace as defined by
-> [viem](https://github.com/wevm/viem/tree/main/src/chains/definitions) and importable via
-> `import {hedera, hederaTestnet}from '@reown/appkit/networks'` Ed25519 based accounts are not
-> supported. For more information see
-> <https://docs.hedera.com/hedera/core-concepts/keys-and-signatures>.
+> [!WARNING]
+>
+> When using the EVM namespace Hedera accounts that have Ed25519 public/private key pairs are
+> not supported. See
+> [Reown - custom chains](https://docs.reown.com/appkit/react/core/custom-networks#1-adding-your-chain-to-viem%E2%80%99s-directory-recommended)
+> for more information.
+>
+> [Hedera - Ed25519 vs ECDSA](https://docs.hedera.com/hedera/core-concepts/keys-and-signatures).
 
 A strong reason to integrate Hedera via the native APIs is to fully support all account types
 and native transaction types provided by Hedera. Integrating both approaches allows for the
-broadest compatibility amongst, dApps, wallets, and users.
+broadest compatibility amongst, apps, wallets, and users.
 
 In the context of Reown's WalletKit and AppKit, this is defined by the namespaces requested by
 apps to wallets. For the EVM compatibility layer, the namespace is `eip155` and for Hedera
