@@ -1,9 +1,20 @@
 # Hedera App
 
-This is an example app that integrates Hedera using both the native Hedera gRPC APIs as well as
-Ethereum JSON-RPC compatible endpoints. This app utilizes
+This is an example app that integrates Hedera using both the native Hedera gRPC and REST APIs as
+well as Ethereum JSON-RPC compatible endpoints. This app utilizes
 [Reown AppKit](https://docs.reown.com/appkit/overview). For an example Hedera wallet
 implementation see <https://github.com/hgraph-io/hedera-wallet>.
+
+> [!INFO]
+>
+> Hedera consensus nodes provide gRPC APIs to change network state such as submitting as
+> transferring cryptocurrency or smart contract calls that change network state.
+> 
+> Hedera mirror nodes provide REST APIs to query read-only network state such as account
+> balances and transaction history.
+>
+> - [Consensus Nodes](https://docs.hedera.com/hedera/networks/mainnet/mainnet-nodes)
+> - [Mirror Nodes](https://docs.hedera.com/hedera/core-concepts/mirror-nodes)
 
 ## Getting started
 
