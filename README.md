@@ -5,7 +5,7 @@ well as Ethereum JSON-RPC compatible endpoints. This app utilizes
 [Reown AppKit](https://docs.reown.com/appkit/overview). For an example Hedera wallet
 implementation see <https://github.com/hgraph-io/hedera-wallet>.
 
-> [!INFO]
+> [!NOTE]
 >
 > Hedera consensus nodes provide gRPC APIs to change network state such as submitting as
 > transferring cryptocurrency or smart contract calls that change network state.
