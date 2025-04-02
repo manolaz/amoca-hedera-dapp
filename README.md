@@ -41,11 +41,9 @@ available in the EVM ecosystem.
 > [!WARNING]
 >
 > When using the EVM namespace Hedera accounts that have Ed25519 public/private key pairs are
-> not supported. See
-> [Reown - custom chains](https://docs.reown.com/appkit/react/core/custom-networks#1-adding-your-chain-to-viem%E2%80%99s-directory-recommended)
-> for more information.
->
-> [Hedera - Ed25519 vs ECDSA](https://docs.hedera.com/hedera/core-concepts/keys-and-signatures).
+> not supported. See the docs for more information:
+> [Reown: Custom networks](https://docs.reown.com/appkit/react/core/custom-networks#1-adding-your-chain-to-viem%E2%80%99s-directory-recommended) >
+> [Hedera: Ed25519 vs ECDSA](https://docs.hedera.com/hedera/core-concepts/keys-and-signatures#choosing-between-ecdsa-and-ed25519-keys).
 
 A strong reason to integrate Hedera via the native APIs is to fully support all account types
 and native transaction types provided by Hedera. Integrating both approaches allows for the
