@@ -28,20 +28,24 @@ npm run dev
 
 ## EVM vs Hedera native transactions
 
-Hedera acheives EVM compatibility by implementing the Ethereum JSON-RPC spec through a middle
-layer called a JSON-RPC relay. This relay is responsible for translating EVM transactions into
-Hedera native transactions. To see a full list of supported methods, refer to
+The Hedera network provides gRPC and REST APIs that are consumed by Hedera SDKs and network
+users.
+
+Hedera supports the Ethereum JSON-RPC spec through a middle layer called the Hedera JSON-RPC
+Relay. This relay is responsible for translating Ethereum JSON-RPC API calls into Hedera gRPC
+API calls. To see a full list of supported methods, refer to
 <https://github.com/hashgraph/hedera-json-rpc-relay/blob/main/docs/rpc-api.md>
 
-Both wallets and apps that integrate Hedera can choose to use either the EVM compatibility layer
-or interact directly with Hedera APIs through the SDKs or implement both. A strong reason to
-integrate Hedera via the EVM compatibility is to leverage existing tooling and libraries
-available in the EVM ecosystem.
+Apps and wallets that integrate Hedera can choose to use the Hedera JSON-RPC Relay to interact
+with the network, directly use Hedera APIs and SDKs, or do both. A strong reason to integrate
+Hedera leveraging the Hedera JSON-RPC Relay is to utilize existing tools and libraries available
+in the EVM ecosystem such as Wagmi, Viem, AppKit, and WalletKit.
 
 > [!WARNING]
 >
 > When using the EVM namespace Hedera accounts that have Ed25519 public/private key pairs are
 > not supported. See the docs for more information.
+>
 > - [Reown: Custom networks](https://docs.reown.com/appkit/react/core/custom-networks#1-adding-your-chain-to-viem%E2%80%99s-directory-recommended)
 > - [Hedera: Ed25519 vs ECDSA](https://docs.hedera.com/hedera/core-concepts/keys-and-signatures#choosing-between-ecdsa-and-ed25519-keys).
 
