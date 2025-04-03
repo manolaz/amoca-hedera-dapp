@@ -54,6 +54,7 @@ export function App() {
 
       <ActionButtonList
         sendHash={setTransactionHash}
+        ethTxHash={transactionHash}
         sendTxId={setTransactionId}
         sendSignMsg={setSignedMsg}
         sendBalance={setBalance}

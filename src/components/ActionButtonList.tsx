@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { BrowserProvider, formatEther, JsonRpcSigner, parseEther, Wallet } from 'ethers'
+import { BrowserProvider, formatEther, JsonRpcSigner, parseEther, Wallet, getBigInt, hexlify } from 'ethers'
 import { ChainNamespace } from '@reown/appkit-common'
 import {
   useDisconnect,
@@ -23,9 +23,11 @@ import {
   transactionToBase64String,
   HederaProvider,
 } from '@hashgraph/hedera-wallet-connect'
+import { BigNumberish } from 'ethers'
 
 // Example receiver addresses
 const testEthReceiver = '0xE53F9824319B891CD4D6050dBF2b242Be7e13344'
+const contractAddress = '0x000000000000000000000000000000000058b83f'
 const testNativeReceiver = '0.0.4848542'
 
 // Example types, and message (EIP-712)
@@ -59,6 +61,7 @@ interface ActionButtonListProps {
   sendSignMsg: (hash: string) => void
   sendBalance: (balance: string) => void
   sendNodeAddresses: (nodes: string[]) => void
+  ethTxHash: string
 }
 
 export const ActionButtonList = ({
@@ -67,6 +70,7 @@ export const ActionButtonList = ({
   sendSignMsg,
   sendBalance,
   sendNodeAddresses,
+  ethTxHash
 }: ActionButtonListProps) => {
   const { disconnect } = useDisconnect()
   const { chainId } = useAppKitNetworkCore()
@@ -304,7 +308,8 @@ export const ActionButtonList = ({
   const eth_blockNumber = async () => {
     const provider = getWalletProvider()
     const bn = await provider.eth_blockNumber()
-    window.alert('eth_blockNumber: ' + bn)
+    const decoded = getBigInt(bn);
+    window.alert('eth_blockNumber: ' + decoded)
   }
 
   // Executes a simple call (dummy data)
@@ -324,15 +329,16 @@ export const ActionButtonList = ({
   // Returns current gas price
   const eth_gasPrice = async () => {
     const provider = getWalletProvider()
-    const price = await provider.eth_gasPrice()
-    window.alert('eth_gasPrice: ' + price)
+    const price = await provider.eth_gasPrice() as BigNumberish
+    const decoded = getBigInt(price);
+    window.alert('eth_gasPrice: ' + decoded)
   }
 
-  // Returns contract code at given address (using current account address as dummy)
+  // Returns contract code at given address
   const eth_getCode = async () => {
     const provider = getWalletProvider()
     if (!address) throw Error('User is disconnected')
-    const code = await provider.eth_getCode(address, 'latest')
+    const code = await provider.eth_getCode(contractAddress, 'latest')
     window.alert('eth_getCode: ' + code)
   }
 
@@ -356,35 +362,40 @@ export const ActionButtonList = ({
     const provider = getWalletProvider()
     const block = (await provider.eth_getBlockByNumber('latest', false)) as { hash: string }
     const count = await provider.eth_getBlockTransactionCountByHash(block.hash)
-    window.alert('eth_getBlockTransactionCountByHash: ' + count)
+    const decoded = getBigInt(count);
+    window.alert('eth_getBlockTransactionCountByHash: ' + decoded)
   }
 
   // Returns transaction count in a block by number
   const eth_getBlockTransactionCountByNumber = async () => {
     const provider = getWalletProvider()
     const count = await provider.eth_getBlockTransactionCountByNumber('latest')
-    window.alert('eth_getBlockTransactionCountByNumber: ' + count)
+    const decoded = getBigInt(count);
+    window.alert('eth_getBlockTransactionCountByNumber: ' + decoded)
   }
 
   // Returns filter logs for a dummy filter (using current address as filter)
   const eth_getFilterLogs = async () => {
     const provider = getWalletProvider()
     const filter = { address: address, fromBlock: 'latest', toBlock: 'latest' }
-    const logs = await provider.eth_getFilterLogs(filter)
+    const filterId = await provider.eth_newFilter(filter)
+    const logs = await provider.eth_getFilterLogs(filterId)
     window.alert('eth_getFilterLogs: ' + JSON.stringify(logs))
   }
 
   // Returns filter changes for a dummy filterId ("0x1")
   const eth_getFilterChanges = async () => {
     const provider = getWalletProvider()
-    const changes = await provider.eth_getFilterChanges('0x1')
+    const filter = { address: address, fromBlock: 'latest', toBlock: 'latest' }
+    const filterId = await provider.eth_newFilter(filter)
+    const changes = await provider.eth_getFilterChanges(filterId)
     window.alert('eth_getFilterChanges: ' + JSON.stringify(changes))
   }
 
   // Returns logs for a dummy filter (using current address)
   const eth_getLogs = async () => {
     const provider = getWalletProvider()
-    const filter = { address: address, fromBlock: 'latest', toBlock: 'latest' }
+    const filter = { address: hexlify(address!), fromBlock: 'latest', toBlock: 'latest' }
     const logs = await provider.eth_getLogs(filter)
     window.alert('eth_getLogs: ' + JSON.stringify(logs))
   }
@@ -411,11 +422,11 @@ export const ActionButtonList = ({
     window.alert('eth_getTransactionByBlockNumberAndIndex: ' + JSON.stringify(tx))
   }
 
-  // Returns transaction details by hash (using hash from signed raw transaction if available)
+  // Returns transaction details by hash (using hash from sended raw transaction if available)
   const eth_getTransactionByHash = async () => {
     const provider = getWalletProvider()
-    if (!signedEthTx) return window.alert('No signed transaction hash available')
-    const tx = await provider.eth_getTransactionByHash(signedEthTx)
+    if (!ethTxHash) return window.alert('No sended transaction hash available')
+    const tx = await provider.eth_getTransactionByHash(ethTxHash)
     window.alert('eth_getTransactionByHash: ' + JSON.stringify(tx))
   }
 
@@ -423,14 +434,15 @@ export const ActionButtonList = ({
   const eth_getTransactionCount = async () => {
     const provider = getWalletProvider()
     const count = await provider.eth_getTransactionCount(address!, 'latest')
-    window.alert('eth_getTransactionCount: ' + count)
+    const decoded = getBigInt(count);
+    window.alert('eth_getTransactionCount: ' + decoded)
   }
 
-  // Returns transaction receipt for a given hash (using signedEthTx if available)
+  // Returns transaction receipt for a given hash (using ethTxHash if available)
   const eth_getTransactionReceipt = async () => {
     const provider = getWalletProvider()
-    if (!signedEthTx) return window.alert('No signed transaction hash available')
-    const receipt = await provider.eth_getTransactionReceipt(signedEthTx)
+    if (!ethTxHash) return window.alert('No signed transaction hash available')
+    const receipt = await provider.eth_getTransactionReceipt(ethTxHash)
     window.alert('eth_getTransactionReceipt: ' + JSON.stringify(receipt))
   }
 
@@ -438,7 +450,8 @@ export const ActionButtonList = ({
   const eth_maxPriorityFeePerGas = async () => {
     const provider = getWalletProvider()
     const fee = await provider.eth_maxPriorityFeePerGas()
-    window.alert('eth_maxPriorityFeePerGas: ' + fee)
+    const decoded = getBigInt(fee);
+    window.alert('eth_maxPriorityFeePerGas: ' + decoded)
   }
 
   // Returns mining status (should be false)
@@ -481,10 +494,12 @@ export const ActionButtonList = ({
     window.alert('eth_syncing: ' + JSON.stringify(syncing))
   }
 
-  // Uninstalls a filter (dummy filter id "0x1")
+  // Uninstalls a filter 
   const eth_uninstallFilter = async () => {
     const provider = getWalletProvider()
-    const result = await provider.eth_uninstallFilter('0x1')
+    const filter = { address: address, fromBlock: 'latest', toBlock: 'latest' }
+    const filterId = await provider.eth_newFilter(filter)
+    const result = await provider.eth_uninstallFilter(filterId)
     window.alert('eth_uninstallFilter: ' + result)
   }
 
@@ -507,6 +522,12 @@ export const ActionButtonList = ({
     const provider = getWalletProvider()
     const version = await provider.web3_clientVersion()
     window.alert('web3_clientVersion: ' + version)
+  }
+
+  const eth_chainId = async () => {
+    const provider = getWalletProvider()
+    const chainId = await provider.eth_chainId()
+    window.alert('eth_chainId: ' + chainId)
   }
 
   return (
@@ -584,6 +605,7 @@ export const ActionButtonList = ({
                   <button onClick={net_listening}>net_listening</button>
                   <button onClick={net_version}>net_version</button>
                   <button onClick={web3_clientVersion}>web3_clientVersion</button>
+                  <button onClick={eth_chainId}>eth_chainId</button>
                 </div>
               </div>
             </>
