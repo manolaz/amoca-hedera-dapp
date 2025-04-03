@@ -12,13 +12,13 @@ import {
   eip155HederaAdapter,
   universalProvider,
 } from './config'
-
 // create an adapter
 
 // Create modal
 createAppKit({
   adapters: [nativeHederaAdapter, eip155HederaAdapter],
   // adapters: [new EthersAdapter()],
+  //@ts-expect-error expected type error
   universalProvider,
   // defaultNetwork: HederaChainDefinition.EVM.Testnet,
   defaultNetwork: hederaTestnet,
