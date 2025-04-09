@@ -131,3 +131,90 @@ a {
   flex-direction: row;
   align-items: center;
 }
+
+/* Modal overlay - covers the entire screen */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+/* Modal content container */
+.modal-content {
+  background-color: var(--background);
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  padding: 20px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Modal title */
+.modal-content h2 {
+  margin-bottom: 16px;
+  font-size: 20px;
+  text-align: center;
+}
+
+/* Form groups - each input and label pair */
+.form-group {
+  margin-bottom: 16px;
+}
+
+/* Labels for form fields */
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/* Input fields */
+.form-group input {
+  width: 100%;
+  padding: 10px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 16px;
+  transition: border-color 0.3s ease;
+  background-color: var(--background);
+  color: black;
+}
+
+.form-group input:focus {
+  border-color: black;
+  outline: none;
+}
+
+.form-group input:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+}
+
+/* Button container - aligns buttons to the right */
+.modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+/* Modal button styling - inherits from your global button styles */
+/* Additional modal-specific button styles can be added here */
+.modal-buttons button:first-child {
+  background-color: #f5f5f5;
+  border-color: #e0e0e0;
+}
+
+.modal-buttons button:first-child:hover:enabled {
+  background-color: #e0e0e0;
+  color: black;
+}
