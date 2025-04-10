@@ -12,23 +12,18 @@ import {
   eip155HederaAdapter,
   universalProvider,
 } from './config'
-// create an adapter
 
 // Create modal
 createAppKit({
   adapters: [nativeHederaAdapter, eip155HederaAdapter],
-  // adapters: [new EthersAdapter()],
-  //@ts-expect-error expected type error
   universalProvider,
-  // defaultNetwork: HederaChainDefinition.EVM.Testnet,
   defaultNetwork: hederaTestnet,
   projectId,
   metadata,
-  // networks: [hederaTestnet],
   networks,
   themeMode: 'light' as const,
   features: {
-    analytics: true, // Optional - defaults to your Cloud configuration
+    analytics: true,
     socials: false,
     swaps: false,
     onramp: false,
@@ -36,12 +31,17 @@ createAppKit({
   },
 })
 
+export interface FunctionResult {
+  functionName: string;
+  result: string;
+}
+
 export function App() {
   const [transactionHash, setTransactionHash] = useState('')
   const [transactionId, setTransactionId] = useState('')
   const [signedMsg, setSignedMsg] = useState('')
-  const [balance, setBalance] = useState('')
   const [nodes, setNodes] = useState<string[]>([])
+  const [lastFunctionResult, setLastFunctionResult] = useState<FunctionResult | null>(null)
 
   return (
     <div className="pages">
@@ -49,16 +49,14 @@ export function App() {
         <img src="/reown.svg" alt="Reown" style={{ width: '150px', height: '150px' }} />
         <img src="/hedera.svg" alt="Hedera" style={{ width: '90px', height: '90px' }} />
       </div>
-
       <h1>Hedera App Example using Reown AppKit and Hedera</h1>
-
       <ActionButtonList
         sendHash={setTransactionHash}
         ethTxHash={transactionHash}
         sendTxId={setTransactionId}
         sendSignMsg={setSignedMsg}
-        sendBalance={setBalance}
         sendNodeAddresses={setNodes}
+        setLastFunctionResult={setLastFunctionResult}
       />
       <div className="advice">
         <p>
@@ -78,8 +76,8 @@ export function App() {
         hash={transactionHash}
         txId={transactionId}
         signedMsg={signedMsg}
-        balance={balance}
         nodes={nodes}
+        lastFunctionResult={lastFunctionResult}
       />
     </div>
   )

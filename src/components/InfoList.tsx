@@ -9,16 +9,17 @@ import {
   useAppKitNetworkCore,
 } from '@reown/appkit/react'
 import { HederaProvider } from '@hashgraph/hedera-wallet-connect'
+import { FunctionResult } from '../App'
 
 interface InfoListProps {
   hash: string
   txId: string
   signedMsg: string
-  balance: string
   nodes: string[]
+  lastFunctionResult: FunctionResult | null
 }
 
-export const InfoList = ({ hash, txId, signedMsg, balance, nodes }: InfoListProps) => {
+export const InfoList = ({ hash, txId, signedMsg, nodes, lastFunctionResult }: InfoListProps) => {
   const [statusEthTx, setStatusEthTx] = useState('')
   const { themeMode, themeVariables } = useAppKitTheme()
   const state = useAppKitState()
@@ -44,17 +45,22 @@ export const InfoList = ({ hash, txId, signedMsg, balance, nodes }: InfoListProp
         }
       }
     }
-
     checkTransactionStatus()
   }, [hash, walletProvider, chainId, state.activeChain, txId, isEthChain])
 
   return (
     <>
-      {balance && (
+      {lastFunctionResult && (
         <section>
-          <h2>Balance: {balance}</h2>
+          <h2>Last Function Result</h2>
+          <pre style={{  wordBreak: 'break-all' }}>
+            Function: {lastFunctionResult.functionName}
+            <br />
+            Result: {lastFunctionResult.result}
+          </pre>
         </section>
       )}
+
       {hash && isEthChain && (
         <section>
           <h2>Transaction</h2>
@@ -74,6 +80,7 @@ export const InfoList = ({ hash, txId, signedMsg, balance, nodes }: InfoListProp
           </pre>
         </section>
       )}
+
       {txId && !isEthChain && (
         <section>
           <h2>Transaction</h2>
@@ -91,6 +98,7 @@ export const InfoList = ({ hash, txId, signedMsg, balance, nodes }: InfoListProp
           </pre>
         </section>
       )}
+
       {signedMsg && (
         <section>
           <h2>Signature of message</h2>
@@ -100,6 +108,7 @@ export const InfoList = ({ hash, txId, signedMsg, balance, nodes }: InfoListProp
           </pre>
         </section>
       )}
+
       <section>
         <h2>useAppKit</h2>
         <pre>
