@@ -10,7 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@hashgraph/hedera-wallet-connect": "file:../hedera-wallet-connect",
+    "@hashgraph/hedera-wallet-connect": "^2.0.1-canary.b1d8954.0",
     "@hashgraph/sdk": "^2.61.0",
     "@reown/appkit": "^1.7.1",
     "@reown/appkit-adapter-ethers": "^1.7.1",
