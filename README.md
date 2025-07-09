@@ -77,3 +77,21 @@ The repository includes a helper script to prepare a local environment. Run the 
 ```
 
 This script installs npm dependencies, copies the `.env` template if needed, lints the code and builds the project.
+
+## Docker
+
+This project includes a `Dockerfile` so you can run the app in a container without installing Node.js locally.
+
+1. Build the image
+
+```sh
+docker build -t hedera-app .
+```
+
+2. Run the container
+
+```sh
+docker run --rm -p 5173:5173 hedera-app
+```
+
+The app will be available at <http://localhost:5173>.
