@@ -98,10 +98,10 @@ This project includes a `Dockerfile` so you can run the app in a container witho
 docker build -t hedera-app .
 ```
 
-2. Run the container
+2. Run the container with your project ID
 
 ```sh
-docker run --rm -p 5173:5173 hedera-app
+docker run --rm -p 5173:5173 -e VITE_REOWN_PROJECT_ID=<your_project_id> hedera-app
 ```
 
 The app will be available at <http://localhost:5173>.
