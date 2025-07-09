@@ -67,3 +67,13 @@ and native transaction types provided by Hedera.
 In the context of Reown's WalletKit and AppKit, this is defined by the namespaces requested by
 apps to wallets. The namespace is `eip155` for the EVM compatibility layer and `hedera` for
 native integration.
+
+## Agent setup
+
+The repository includes a helper script to prepare a local environment. Run the following command after cloning the project:
+
+```sh
+./agent-setup.sh
+```
+
+This script installs npm dependencies, copies the `.env` template if needed, lints the code and builds the project.
