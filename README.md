@@ -78,6 +78,16 @@ The repository includes a helper script to prepare a local environment. Run the 
 
 This script installs npm dependencies, copies the `.env` template if needed, lints the code and builds the project.
 
+## Running tests with coverage
+
+To generate a coverage report, run:
+
+```sh
+npm run coverage
+```
+
+The report will be saved in the `coverage` directory and a summary will be printed in the console.
+
 ## Docker
 
 This project includes a `Dockerfile` so you can run the app in a container without installing Node.js locally.
