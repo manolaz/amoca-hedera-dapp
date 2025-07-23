@@ -28,7 +28,7 @@ beforeEach(() => {
 
 describe('InfoList', () => {
   it('shows transaction status for eth tx', async () => {
-    const { InfoList } = await import('../InfoList')
+    const { InfoList } = await import('../../src/components/InfoList')
     render(<InfoList hash="0x1" txId="" signedMsg="" nodes={[]} lastFunctionResult={null} />)
     await waitFor(() => {
       expect(screen.getByText(/Status: Success/)).toBeInTheDocument()
@@ -36,7 +36,7 @@ describe('InfoList', () => {
   })
 
   it('shows nodes and last result', async () => {
-    const { InfoList } = await import('../InfoList')
+    const { InfoList } = await import('../../src/components/InfoList')
     activeChain = 'hedera'
     render(<InfoList hash="" txId="tx" signedMsg="sig" nodes={["n1"]} lastFunctionResult={{ functionName: 'f', result: 'r' }} />)
     expect(screen.getByText('Last Function Result')).toBeInTheDocument()

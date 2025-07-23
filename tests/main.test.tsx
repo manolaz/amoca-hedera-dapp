@@ -6,12 +6,12 @@ let ErrorBoundaryMock: ({ children }: { children: React.ReactNode }) => JSX.Elem
 let createRootMock: ReturnType<typeof vi.fn>
 let renderMock: ReturnType<typeof vi.fn>
 
-vi.mock('./App.tsx', () => {
+vi.mock('../src/App.tsx', () => {
   AppMock = () => <div data-testid="app" />
   return { __esModule: true, default: AppMock }
 })
 
-vi.mock('./components/ErrorBoundary', () => {
+vi.mock('../src/components/ErrorBoundary', () => {
   ErrorBoundaryMock = ({ children }: { children: React.ReactNode }) => (
     <div data-testid="error-boundary">{children}</div>
   )
@@ -38,7 +38,7 @@ describe('main entry', () => {
   })
 
   it('creates root and renders wrapped App', async () => {
-    await import('./main')
+    await import('../src/main')
 
     const rootElement = document.getElementById(rootId)
     expect(createRootMock).toHaveBeenCalledWith(rootElement)

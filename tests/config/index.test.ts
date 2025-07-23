@@ -35,12 +35,12 @@ afterEach(() => {
 
 describe('config module', () => {
   it('throws when projectId is missing', async () => {
-    await expect(import('./index')).rejects.toThrow('Project ID is not defined')
+    await expect(import('../../src/config/index')).rejects.toThrow('Project ID is not defined')
   })
 
   it('exports expected values', async () => {
     process.env.VITE_REOWN_PROJECT_ID = 'pid123'
-    const config = await import('./index')
+    const config = await import('../../src/config/index')
 
     expect(config.projectId).toBe('pid123')
     expect(config.metadata).toEqual({

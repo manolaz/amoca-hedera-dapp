@@ -62,7 +62,7 @@ vi.mock('@hashgraph/hedera-wallet-connect', () => ({
   HederaProvider: class {},
 }))
 
-vi.mock('../Modal', () => {
+vi.mock('../../src/components/Modal', () => {
   const React = require('react')
   return {
     Modal: ({ isOpen, onSubmit, fields }: any) => {
@@ -104,7 +104,7 @@ describe('ActionButtonList', () => {
   }
 
   it('executes all ethereum methods', async () => {
-    const { ActionButtonList } = await import('../ActionButtonList')
+    const { ActionButtonList } = await import('../../src/components/ActionButtonList')
     render(<ActionButtonList {...props} />)
 
     const methods = [
@@ -156,7 +156,7 @@ describe('ActionButtonList', () => {
   it('executes all hedera methods', async () => {
     activeChain = 'hedera'
     walletProvider = createWalletProviderMock()
-    const { ActionButtonList } = await import('../ActionButtonList')
+    const { ActionButtonList } = await import('../../src/components/ActionButtonList')
     render(<ActionButtonList {...props} />)
 
     const methods = [

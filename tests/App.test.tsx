@@ -6,15 +6,15 @@ vi.mock('@reown/appkit/react', () => ({
   createAppKit: vi.fn(),
 }))
 
-vi.mock('./components/ActionButtonList', () => ({
+vi.mock('../src/components/ActionButtonList', () => ({
   ActionButtonList: () => <div data-testid="action-list" />,
 }))
 
-vi.mock('./components/InfoList', () => ({
+vi.mock('../src/components/InfoList', () => ({
   InfoList: () => <div data-testid="info-list" />,
 }))
 
-vi.mock('./config', () => ({
+vi.mock('../src/config', () => ({
   projectId: 'test',
   metadata: {},
   networks: [],
@@ -23,7 +23,7 @@ vi.mock('./config', () => ({
   universalProvider: {},
 }))
 
-import App from './App'
+import App from '../src/App'
 
 describe('App', () => {
   it('renders header', () => {

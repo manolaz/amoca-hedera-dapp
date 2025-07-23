@@ -22,6 +22,7 @@ createAppKit({
   metadata,
   networks,
   themeMode: 'light' as const,
+  enableReconnect: true,
   features: {
     analytics: true,
     socials: false,

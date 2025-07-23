@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { Modal } from '../Modal'
-import type { FieldConfig } from '../../utils/methodConfigs'
+import { Modal } from '../../src/components/Modal'
+import type { FieldConfig } from '../../src/utils/methodConfigs'
 
 beforeEach(() => {
   localStorage.clear()

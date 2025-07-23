@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import { describe, it, expect, vi } from 'vitest'
-import ErrorBoundary from '../ErrorBoundary'
+import ErrorBoundary from '../../src/components/ErrorBoundary'
 
 function ProblemChild() {
   throw new Error('Test error')
