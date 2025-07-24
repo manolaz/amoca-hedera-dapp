@@ -150,10 +150,45 @@ export const ActionButtonList = ({
         isLoading={isLoading}
       />
       <>
+        {isConnected && (
+          <>
+            <br />
+            <hr />
+            <div>
+              <br />
+              <strong>EIP-155 Methods (Wallet):</strong>
+            </div>
+            <div>
+              {createMethodButton('eth_signMessage')}
+              {createMethodButton('eth_signTransaction')}
+              {createMethodButton('eth_sendTransaction')}
+              {createMethodButton('eth_signTypedData')}
+              {createMethodButton('eth_sendRawTransaction')}
+            </div>
+          </>
+        )}
+        {isConnected && activeChain == ('hedera' as ChainNamespace) && (
+          <>
+            <div>
+              <br />
+              <strong>HIP-820 Methods:</strong>
+            </div>
+            <div>
+              {createMethodButton('hedera_getNodeAddresses')}
+              {createMethodButton('hedera_signMessage')}
+              {createMethodButton('hedera_signTransaction')}
+              {createMethodButton('hedera_executeTransaction')}
+              {createMethodButton('hedera_signAndExecuteQuery')}
+              {createMethodButton('hedera_signAndExecuteTransaction')}
+            </div>
+          </>
+        )}
+        <hr />
         <div>
           <br />
-          <strong>EIP-155 Methods (JSON-RPC Relay):</strong>
+          <strong>EIP-155 Methods called directly by a dApp to a JSON-RPC provider</strong>
         </div>
+
         <div>
           <div>
             {createMethodButton('eth_getBalance', false)}
@@ -187,37 +222,6 @@ export const ActionButtonList = ({
             {createMethodButton('eth_chainId', false)}
           </div>
         </div>
-        {isConnected && (
-          <>
-            <div>
-              <br />
-              <strong>EIP-155 Methods (Wallet):</strong>
-            </div>
-            <div>
-              {createMethodButton('eth_signMessage')}
-              {createMethodButton('eth_signTransaction')}
-              {createMethodButton('eth_sendTransaction')}
-              {createMethodButton('eth_signTypedData')}
-              {createMethodButton('eth_sendRawTransaction')}
-            </div>
-          </>
-        )}
-        {isConnected && activeChain == ('hedera' as ChainNamespace) && (
-          <>
-            <div>
-              <br />
-              <strong>HIP-820 Methods:</strong>
-            </div>
-            <div>
-              {createMethodButton('hedera_getNodeAddresses')}
-              {createMethodButton('hedera_signMessage')}
-              {createMethodButton('hedera_signTransaction')}
-              {createMethodButton('hedera_executeTransaction')}
-              {createMethodButton('hedera_signAndExecuteQuery')}
-              {createMethodButton('hedera_signAndExecuteTransaction')}
-            </div>
-          </>
-        )}
       </>
     </div>
   )
