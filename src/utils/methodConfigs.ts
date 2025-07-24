@@ -270,6 +270,7 @@ export const ethMethodConfigs: Record<string, MethodConfig> = {
         label: 'Block Hash',
         type: 'text',
         placeholder: 'e.g. 0x...',
+        defaultValue: "0xf5fa3dae6aaf31c0ec0eaf6cfb153c3916b32f0610b10c061dd70105df0f3b6e",
         required: true,
       },
     ],
