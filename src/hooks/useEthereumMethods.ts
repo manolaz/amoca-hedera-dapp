@@ -133,10 +133,12 @@ export const useEthereumMethods = ({
     walletProvider && address && browserProvider
       ? new JsonRpcSigner(browserProvider, address)
       : undefined
-  const rpcProvider =
-    walletProvider && chainId
-      ? (walletProvider.rpcProviders as any)?.eip155?.httpProviders?.[chainId]
-      : jsonRpcProvider
+  const rpcProvider = walletProvider && chainId
+    ? (walletProvider.rpcProviders as any)?.eip155?.httpProviders?.[chainId]
+    : {
+        request: ({ method, params }: { method: string; params: unknown[] }) =>
+          jsonRpcProvider.send(method, params as any),
+      }
 
   const execute = async (methodName: string, params: Record<string, string>) => {
     switch (methodName) {
