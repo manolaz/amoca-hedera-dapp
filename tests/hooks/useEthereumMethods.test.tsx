@@ -24,6 +24,11 @@ vi.mock('ethers', () => {
   }
 })
 
+const sendMock = vi.fn(async () => '0x5')
+vi.mock('../../src/config', () => ({
+  jsonRpcProvider: { send: sendMock },
+}))
+
 describe('useEthereumMethods', () => {
   let rpcProvider: any
   let walletProvider: any
@@ -54,6 +59,7 @@ describe('useEthereumMethods', () => {
     process.env.VITE_REOWN_PROJECT_ID = 'pid'
     sendHash = vi.fn()
     sendSignMsg = vi.fn()
+    sendMock.mockClear()
     rpcProvider = {
       request: vi.fn(async ({ method }: any) => {
         switch (method) {
@@ -88,6 +94,14 @@ describe('useEthereumMethods', () => {
     })
     await act(async () => {
       const res = await execute('eth_sendRawTransaction', {})
+      expect(res).toBe('rawHash')
+    })
+    expect(sendHash).toHaveBeenCalledWith('rawHash')
+  })
+
+  it('sends a transaction directly', async () => {
+    await act(async () => {
+      const res = await execute('eth_sendTransaction', { to: '0x1', value: '1', gasLimit: '1' })
       expect(res).toBe('rawHash')
     })
     expect(sendHash).toHaveBeenCalledWith('rawHash')
@@ -172,5 +186,28 @@ describe('useEthereumMethods', () => {
     render(<Wrapper onReady={(fn: any) => { execFn = fn }} />)
     await expect(execFn('eth_sendTransaction', { to: '0x1', value: '1', gasLimit: '1' })).rejects.toThrow('Wallet not connected')
     await expect(execFn('eth_sendRawTransaction', {})).rejects.toThrow('Transaction not signed')
+  })
+
+  it('uses fallback jsonRpc provider', async () => {
+    const mod = await import('../../src/hooks/useEthereumMethods')
+    let execFn: any
+    function Wrapper({ onReady }: any) {
+      const { executeEthMethod } = mod.useEthereumMethods({
+        walletProvider: undefined,
+        chainId: undefined,
+        address: '0xabc',
+        ethTxHash: '0x0',
+        sendHash,
+        sendSignMsg,
+      })
+      useEffect(() => { onReady(executeEthMethod) }, [executeEthMethod, onReady])
+      return null
+    }
+    render(<Wrapper onReady={(fn: any) => { execFn = fn }} />)
+    await act(async () => {
+      const res = await execFn('eth_getBalance', { address: '0xabc' })
+      expect(res).toBe('5')
+    })
+    expect(sendMock).toHaveBeenCalledWith('eth_getBalance', ['0xabc', 'latest'])
   })
 })
