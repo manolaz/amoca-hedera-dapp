@@ -107,12 +107,19 @@ export const ActionButtonList = ({
         functionName: methodName,
         result: typeof result === 'object' ? JSON.stringify(result) : String(result || ''),
       })
+      // Show result in an alert for quick feedback
+      if (typeof window !== 'undefined') {
+        window.alert(typeof result === 'object' ? JSON.stringify(result) : String(result || ''))
+      }
     } catch (error) {
       console.error(`Error executing ${methodName}:`, error)
       setLastFunctionResult({
         functionName: methodName,
         result: `Error: ${(error as Error).message}`,
       })
+      if (typeof window !== 'undefined') {
+        window.alert(`Error: ${(error as Error).message}`)
+      }
     } finally {
       setIsLoading(false)
     }

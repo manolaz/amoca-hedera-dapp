@@ -3,6 +3,7 @@ import { describe, it, beforeEach, expect, vi } from 'vitest'
 
 let activeChain: string
 let walletProvider: any
+let alertMock: any
 
 function createWalletProviderMock() {
   const httpProvider = { request: vi.fn(async ({ method }: any) => method + '_result') }
@@ -106,14 +107,13 @@ beforeEach(() => {
   activeChain = 'eip155'
   walletProvider = createWalletProviderMock()
   process.env.VITE_REOWN_PROJECT_ID = 'pid'
+  alertMock = vi.fn()
+  ;(global as any).alert = alertMock
 })
 
 afterEach(() => {
   delete process.env.VITE_REOWN_PROJECT_ID
-})
-
-afterEach(() => {
-  delete process.env.VITE_REOWN_PROJECT_ID
+  ;(global as any).alert = undefined
 })
 
 describe('ActionButtonList', () => {
@@ -173,6 +173,7 @@ describe('ActionButtonList', () => {
 
     await waitFor(() => {
       expect(props.setLastFunctionResult).toHaveBeenCalled()
+      expect(alertMock).toHaveBeenCalled()
     })
   })
 
@@ -197,6 +198,7 @@ describe('ActionButtonList', () => {
 
     await waitFor(() => {
       expect(props.setLastFunctionResult).toHaveBeenCalled()
+      expect(alertMock).toHaveBeenCalled()
     })
   })
 })
