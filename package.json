@@ -1,6 +1,6 @@
 {
   "name": "hedera-app",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "type": "module",
   "scripts": {
     "dev": "vite --port 5173 --force",
@@ -11,7 +11,7 @@
     "test": "npm run build && vitest run --coverage"
   },
   "dependencies": {
-    "@hashgraph/hedera-wallet-connect": "^2.0.1-canary.0b06f5b.0",
+    "@hashgraph/hedera-wallet-connect": "2.0.1-canary.603b934.0",
     "@hashgraph/sdk": "^2.61.0",
     "@reown/appkit": "^1.7.16",
     "@reown/appkit-adapter-ethers": "^1.7.16",
