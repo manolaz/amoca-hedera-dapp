@@ -6,9 +6,13 @@ import {
   hederaNamespace,
 } from '@hashgraph/hedera-wallet-connect'
 import UniversalProvider from '@walletconnect/universal-provider'
+import { JsonRpcProvider } from 'ethers'
 
 // Get projectId from https://cloud.reown.com
 export const projectId = import.meta.env.VITE_REOWN_PROJECT_ID
+export const hederaRpcUrl =
+  import.meta.env.VITE_HEDERA_RPC_URL || 'https://testnet.hedera.api.hgraph.io/v1/pk_test/rpc'
+export const jsonRpcProvider = new JsonRpcProvider(hederaRpcUrl)
 
 if (!projectId) {
   throw new Error('Project ID is not defined')

@@ -46,9 +46,9 @@ export const ActionButtonList = ({
   )
 
   const { executeEthMethod } = useEthereumMethods({
-    walletProvider: walletProvider as HederaProvider,
-    chainId,
-    address: address!,
+    walletProvider: isConnected ? (walletProvider as HederaProvider) : undefined,
+    chainId: isConnected ? chainId : undefined,
+    address: isConnected ? address! : undefined,
     ethTxHash,
     sendHash,
     sendSignMsg,
@@ -119,11 +119,11 @@ export const ActionButtonList = ({
   }
 
   // Create buttons for supported methods
-  const createMethodButton = (methodName: string) => (
+  const createMethodButton = (methodName: string, requiresConnection = true) => (
     <button
       key={methodName}
       onClick={() => openModal(methodName)}
-      disabled={!isConnected || isLoading}
+      disabled={(requiresConnection && !isConnected) || isLoading}
       className="method-button"
     >
       {methodName}
@@ -149,78 +149,76 @@ export const ActionButtonList = ({
         fields={modalFields}
         isLoading={isLoading}
       />
-      {isConnected ? (
-        <>
-          {activeChain === 'eip155' && (
-            <>
-              <div>
-                <br />
-                <strong>EIP-155 Methods (Wallet):</strong>
-              </div>
-              <div>
-                {createMethodButton('eth_signMessage')}
-                {createMethodButton('eth_signTransaction')}
-                {createMethodButton('eth_sendTransaction')}
-                {createMethodButton('eth_signTypedData')}
-                {createMethodButton('eth_sendRawTransaction')}
-              </div>
-              <div>
-                <br />
-                <strong>EIP-155 Methods (JSON-RPC Relay):</strong>
-              </div>
-              <div>
-                <div>
-                  {createMethodButton('eth_getBalance')}
-                  {createMethodButton('eth_blockNumber')}
-                  {createMethodButton('eth_call')}
-                  {createMethodButton('eth_feeHistory')}
-                  {createMethodButton('eth_gasPrice')}
-                  {createMethodButton('eth_getCode')}
-                  {createMethodButton('eth_getBlockByHash')}
-                  {createMethodButton('eth_getBlockByNumber')}
-                  {createMethodButton('eth_getBlockTransactionCountByHash')}
-                  {createMethodButton('eth_getBlockTransactionCountByNumber')}
-                  {createMethodButton('eth_getFilterLogs')}
-                  {createMethodButton('eth_getFilterChanges')}
-                  {createMethodButton('eth_getLogs')}
-                  {createMethodButton('eth_getStorageAt')}
-                  {createMethodButton('eth_getTransactionByBlockHashAndIndex')}
-                  {createMethodButton('eth_getTransactionByBlockNumberAndIndex')}
-                  {createMethodButton('eth_getTransactionByHash')}
-                  {createMethodButton('eth_getTransactionCount')}
-                  {createMethodButton('eth_getTransactionReceipt')}
-                  {createMethodButton('eth_maxPriorityFeePerGas')}
-                  {createMethodButton('eth_mining')}
-                  {createMethodButton('eth_newBlockFilter')}
-                  {createMethodButton('eth_newFilter')}
-                  {createMethodButton('eth_syncing')}
-                  {createMethodButton('eth_uninstallFilter')}
-                  {createMethodButton('net_listening')}
-                  {createMethodButton('net_version')}
-                  {createMethodButton('web3_clientVersion')}
-                  {createMethodButton('eth_chainId')}
-                </div>
-              </div>
-            </>
-          )}
-          {activeChain == ('hedera' as ChainNamespace) && (
-            <>
-              <div>
-                <br />
-                <strong>HIP-820 Methods:</strong>
-              </div>
-              <div>
-                {createMethodButton('hedera_getNodeAddresses')}
-                {createMethodButton('hedera_signMessage')}
-                {createMethodButton('hedera_signTransaction')}
-                {createMethodButton('hedera_executeTransaction')}
-                {createMethodButton('hedera_signAndExecuteQuery')}
-                {createMethodButton('hedera_signAndExecuteTransaction')}
-              </div>
-            </>
-          )}
-        </>
-      ) : null}
+      <>
+        <div>
+          <br />
+          <strong>EIP-155 Methods (JSON-RPC Relay):</strong>
+        </div>
+        <div>
+          <div>
+            {createMethodButton('eth_getBalance', false)}
+            {createMethodButton('eth_blockNumber', false)}
+            {createMethodButton('eth_call', false)}
+            {createMethodButton('eth_feeHistory', false)}
+            {createMethodButton('eth_gasPrice', false)}
+            {createMethodButton('eth_getCode', false)}
+            {createMethodButton('eth_getBlockByHash', false)}
+            {createMethodButton('eth_getBlockByNumber', false)}
+            {createMethodButton('eth_getBlockTransactionCountByHash', false)}
+            {createMethodButton('eth_getBlockTransactionCountByNumber', false)}
+            {createMethodButton('eth_getFilterLogs', false)}
+            {createMethodButton('eth_getFilterChanges', false)}
+            {createMethodButton('eth_getLogs', false)}
+            {createMethodButton('eth_getStorageAt', false)}
+            {createMethodButton('eth_getTransactionByBlockHashAndIndex', false)}
+            {createMethodButton('eth_getTransactionByBlockNumberAndIndex', false)}
+            {createMethodButton('eth_getTransactionByHash', false)}
+            {createMethodButton('eth_getTransactionCount', false)}
+            {createMethodButton('eth_getTransactionReceipt', false)}
+            {createMethodButton('eth_maxPriorityFeePerGas', false)}
+            {createMethodButton('eth_mining', false)}
+            {createMethodButton('eth_newBlockFilter', false)}
+            {createMethodButton('eth_newFilter', false)}
+            {createMethodButton('eth_syncing', false)}
+            {createMethodButton('eth_uninstallFilter', false)}
+            {createMethodButton('net_listening', false)}
+            {createMethodButton('net_version', false)}
+            {createMethodButton('web3_clientVersion', false)}
+            {createMethodButton('eth_chainId', false)}
+          </div>
+        </div>
+        {isConnected && (
+          <>
+            <div>
+              <br />
+              <strong>EIP-155 Methods (Wallet):</strong>
+            </div>
+            <div>
+              {createMethodButton('eth_signMessage')}
+              {createMethodButton('eth_signTransaction')}
+              {createMethodButton('eth_sendTransaction')}
+              {createMethodButton('eth_signTypedData')}
+              {createMethodButton('eth_sendRawTransaction')}
+            </div>
+          </>
+        )}
+        {isConnected && activeChain == ('hedera' as ChainNamespace) && (
+          <>
+            <div>
+              <br />
+              <strong>HIP-820 Methods:</strong>
+            </div>
+            <div>
+              {createMethodButton('hedera_getNodeAddresses')}
+              {createMethodButton('hedera_signMessage')}
+              {createMethodButton('hedera_signTransaction')}
+              {createMethodButton('hedera_executeTransaction')}
+              {createMethodButton('hedera_signAndExecuteQuery')}
+              {createMethodButton('hedera_signAndExecuteTransaction')}
+            </div>
+          </>
+        )}
+      </>
     </div>
   )
 }

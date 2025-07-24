@@ -2,6 +2,7 @@ import { useState } from 'react'
 import {
   BrowserProvider,
   formatEther,
+  JsonRpcProvider,
   JsonRpcSigner,
   parseEther,
   getBigInt,
@@ -11,6 +12,7 @@ import {
 } from 'ethers'
 import { HederaProvider } from '@hashgraph/hedera-wallet-connect'
 import { eip712Types } from '../utils/eip712'
+import { jsonRpcProvider } from '../config'
 
 export interface EthSendTransactionParams {
   to: string
@@ -94,9 +96,9 @@ export type EthMethodParams =
   | Record<string, string>
 
 interface UseEthereumMethodsProps {
-  walletProvider: HederaProvider
-  chainId: number
-  address: string
+  walletProvider?: HederaProvider
+  chainId?: number
+  address?: string
   ethTxHash: string
   sendHash: (hash: string) => void
   sendSignMsg: (msg: string) => void
@@ -112,10 +114,16 @@ export const useEthereumMethods = ({
 }: UseEthereumMethodsProps) => {
   const [signedEthTx, setSignedEthTx] = useState<string>()
 
-  const browserProvider = new BrowserProvider(walletProvider, chainId)
-  const signer = new JsonRpcSigner(browserProvider, address)
+  const browserProvider =
+    walletProvider && chainId ? new BrowserProvider(walletProvider, chainId) : undefined
+  const signer =
+    walletProvider && address && browserProvider
+      ? new JsonRpcSigner(browserProvider, address)
+      : undefined
   const rpcProvider =
-    (walletProvider.rpcProviders as any)?.eip155?.httpProviders?.[chainId]
+    walletProvider && chainId
+      ? (walletProvider.rpcProviders as any)?.eip155?.httpProviders?.[chainId]
+      : jsonRpcProvider
 
   const execute = async (methodName: string, params: Record<string, string>) => {
     switch (methodName) {
@@ -140,11 +148,7 @@ export const useEthereumMethods = ({
         const p = params as EthFeeHistoryParams
         const history = await rpcProvider.request({
           method: 'eth_feeHistory',
-          params: [
-            toQuantity(+p.blockCount),
-            p.newestBlock,
-            [] as number[],
-          ],
+          params: [toQuantity(+p.blockCount), p.newestBlock, [] as number[]],
         })
         return JSON.stringify(history)
       }
@@ -156,6 +160,7 @@ export const useEthereumMethods = ({
         return getBigInt(price)
       }
       case 'eth_sendTransaction': {
+        if (!signer) throw new Error('Wallet not connected')
         const p = params as EthSendTransactionParams
         const tx = {
           to: p.to,
@@ -167,6 +172,7 @@ export const useEthereumMethods = ({
         return txResponse.hash
       }
       case 'eth_signTransaction': {
+        if (!signer) throw new Error('Wallet not connected')
         const p = params as EthSendTransactionParams
         const tx = {
           to: p.to,
@@ -188,6 +194,7 @@ export const useEthereumMethods = ({
         return txHash
       }
       case 'eth_signMessage': {
+        if (!signer) throw new Error('Wallet not connected')
         const p = params as EthSignMessageParams
         const signature = await signer.signMessage(p.message)
         sendSignMsg(signature)
@@ -356,6 +363,7 @@ export const useEthereumMethods = ({
         return rpcProvider.request({ method: 'web3_clientVersion', params: [] })
       }
       case 'eth_signTypedData': {
+        if (!signer) throw new Error('Wallet not connected')
         const p = params as EthSignTypedDataParams
         const domain = {
           name: p.domain,
