@@ -53,13 +53,11 @@ export function App() {
     }
 
     universalProvider.on('session_delete', handleDisconnect)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ;(universalProvider as any).core?.pairing.events?.on('pairing_delete', handleDisconnect as any)
+    universalProvider.client.core?.pairing.events?.on('pairing_delete', handleDisconnect as any)
 
     return () => {
       universalProvider.off('session_delete', handleDisconnect)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ;(universalProvider as any).core?.pairing.events?.off('pairing_delete', handleDisconnect as any)
+      universalProvider.client.core?.pairing.events?.off('pairing_delete', handleDisconnect as any)
     }
   }, [disconnect])
 

@@ -23,7 +23,7 @@ vi.mock('../src/config', () => {
     networks: [],
     nativeHederaAdapter: {},
     eip155HederaAdapter: {},
-    universalProvider: { on: vi.fn(), off: vi.fn(), core: { pairing: { events } } },
+    universalProvider: { on: vi.fn(), off: vi.fn(), client: { core: { pairing: { events } } } },
   }
 })
 
