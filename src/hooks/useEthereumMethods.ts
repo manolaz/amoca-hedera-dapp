@@ -2,13 +2,13 @@ import { useState } from 'react'
 import {
   BrowserProvider,
   formatEther,
-  JsonRpcProvider,
   JsonRpcSigner,
   parseEther,
   getBigInt,
   hexlify,
   toQuantity,
   BigNumberish,
+  TypedDataField,
 } from 'ethers'
 import { HederaProvider } from '@hashgraph/hedera-wallet-connect'
 import { eip712Types } from '../utils/eip712'
@@ -54,6 +54,16 @@ export interface EthGetBlockByHashParams {
   blockHash: string
   includeTransactions: string
 }
+export interface EthGetBlockByNumberParams {
+  blockTag: string
+  includeTransactions?: string
+}
+export interface EthGetBlockTransactionCountByHashParams {
+  blockHash: string
+}
+export interface EthGetBlockTransactionCountByNumberParams {
+  blockTag: string
+}
 export interface EthGetLogsParams {
   address: string
   fromBlock: string
@@ -88,6 +98,9 @@ export type EthMethodParams =
   | EthGetTransactionByBlockHashAndIndexParams
   | EthGetTransactionByBlockNumberAndIndexParams
   | EthGetBlockByHashParams
+  | EthGetBlockByNumberParams
+  | EthGetBlockTransactionCountByHashParams
+  | EthGetBlockTransactionCountByNumberParams
   | EthGetLogsParams
   | EthNewFilterParams
   | EthUninstallFilterParams
@@ -145,7 +158,7 @@ export const useEthereumMethods = ({
         return getBigInt(bn as any)
       }
       case 'eth_feeHistory': {
-        const p = params as EthFeeHistoryParams
+        const p = params as unknown as EthFeeHistoryParams
         const history = await rpcProvider.request({
           method: 'eth_feeHistory',
           params: [toQuantity(+p.blockCount), p.newestBlock, [] as number[]],
@@ -161,7 +174,7 @@ export const useEthereumMethods = ({
       }
       case 'eth_sendTransaction': {
         if (!signer) throw new Error('Wallet not connected')
-        const p = params as EthSendTransactionParams
+        const p = params as unknown as EthSendTransactionParams
         const tx = {
           to: p.to,
           value: parseEther(p.value),
@@ -173,7 +186,7 @@ export const useEthereumMethods = ({
       }
       case 'eth_signTransaction': {
         if (!signer) throw new Error('Wallet not connected')
-        const p = params as EthSendTransactionParams
+        const p = params as unknown as EthSendTransactionParams
         const tx = {
           to: p.to,
           value: parseEther(p.value),
@@ -195,34 +208,34 @@ export const useEthereumMethods = ({
       }
       case 'eth_signMessage': {
         if (!signer) throw new Error('Wallet not connected')
-        const p = params as EthSignMessageParams
+        const p = params as unknown as EthSignMessageParams
         const signature = await signer.signMessage(p.message)
         sendSignMsg(signature)
         return signature
       }
       case 'eth_call': {
-        const p = params as EthCallParams
+        const p = params as unknown as EthCallParams
         return rpcProvider.request({
           method: 'eth_call',
           params: [{ to: p.to, data: p.data }, 'latest'],
         })
       }
       case 'eth_getCode': {
-        const p = params as EthGetCodeParams
+        const p = params as unknown as EthGetCodeParams
         return rpcProvider.request({
           method: 'eth_getCode',
           params: [p.address, p.blockTag],
         })
       }
       case 'eth_getStorageAt': {
-        const p = params as EthGetStorageAtParams
+        const p = params as unknown as EthGetStorageAtParams
         return rpcProvider.request({
           method: 'eth_getStorageAt',
           params: [p.address, p.position, p.blockTag],
         })
       }
       case 'eth_getTransactionByHash': {
-        const p = params as EthGetTransactionByHashParams
+        const p = params as unknown as EthGetTransactionByHashParams
         const hash = p.hash || ethTxHash
         const tx = await rpcProvider.request({
           method: 'eth_getTransactionByHash',
@@ -238,7 +251,7 @@ export const useEthereumMethods = ({
         return getBigInt(count as any)
       }
       case 'eth_getTransactionReceipt': {
-        const p = params as EthGetTransactionByHashParams
+        const p = params as unknown as EthGetTransactionByHashParams
         const hash = p.hash || ethTxHash
         const receipt = await rpcProvider.request({
           method: 'eth_getTransactionReceipt',
@@ -254,7 +267,7 @@ export const useEthereumMethods = ({
         return getBigInt(fee as any)
       }
       case 'eth_getBlockByHash': {
-        const p = params as EthGetBlockByHashParams
+        const p = params as unknown as EthGetBlockByHashParams
         return (
           (await rpcProvider.request({
             method: 'eth_getBlockByHash',
@@ -263,7 +276,7 @@ export const useEthereumMethods = ({
         )
       }
       case 'eth_getBlockByNumber': {
-        const p = params as EthGetBlockByNumberParams
+        const p = params as unknown as EthGetBlockByNumberParams
         return (
           (await rpcProvider.request({
             method: 'eth_getBlockByNumber',
@@ -272,7 +285,7 @@ export const useEthereumMethods = ({
         )
       }
       case 'eth_getBlockTransactionCountByHash': {
-        const p = params as EthGetBlockTransactionCountByHashParams
+        const p = params as unknown as EthGetBlockTransactionCountByHashParams
         const count = await rpcProvider.request({
           method: 'eth_getBlockTransactionCountByHash',
           params: [p.blockHash],
@@ -280,7 +293,7 @@ export const useEthereumMethods = ({
         return getBigInt(count as any)
       }
       case 'eth_getBlockTransactionCountByNumber': {
-        const p = params as EthGetBlockTransactionCountByNumberParams
+        const p = params as unknown as EthGetBlockTransactionCountByNumberParams
         const count = await rpcProvider.request({
           method: 'eth_getBlockTransactionCountByNumber',
           params: [p.blockTag],
@@ -288,7 +301,7 @@ export const useEthereumMethods = ({
         return getBigInt(count as any)
       }
       case 'eth_getFilterLogs': {
-        const p = params as EthFilterParams
+        const p = params as unknown as EthFilterParams
         const logs = await rpcProvider.request({
           method: 'eth_getFilterLogs',
           params: [p.filterId],
@@ -296,7 +309,7 @@ export const useEthereumMethods = ({
         return JSON.stringify(logs)
       }
       case 'eth_getFilterChanges': {
-        const p = params as EthFilterParams
+        const p = params as unknown as EthFilterParams
         const changes = await rpcProvider.request({
           method: 'eth_getFilterChanges',
           params: [p.filterId],
@@ -304,7 +317,7 @@ export const useEthereumMethods = ({
         return JSON.stringify(changes)
       }
       case 'eth_getTransactionByBlockHashAndIndex': {
-        const p = params as EthGetTransactionByBlockHashAndIndexParams
+        const p = params as unknown as EthGetTransactionByBlockHashAndIndexParams
         const tx = await rpcProvider.request({
           method: 'eth_getTransactionByBlockHashAndIndex',
           params: [p.blockHash, p.index],
@@ -312,7 +325,7 @@ export const useEthereumMethods = ({
         return JSON.stringify(tx)
       }
       case 'eth_getTransactionByBlockNumberAndIndex': {
-        const p = params as EthGetTransactionByBlockNumberAndIndexParams
+        const p = params as unknown as EthGetTransactionByBlockNumberAndIndexParams
         const tx = await rpcProvider.request({
           method: 'eth_getTransactionByBlockNumberAndIndex',
           params: [p.blockNumber, p.index],
@@ -320,7 +333,7 @@ export const useEthereumMethods = ({
         return JSON.stringify(tx)
       }
       case 'eth_getLogs': {
-        const p = params as EthGetLogsParams
+        const p = params as unknown as EthGetLogsParams
         const filter = {
           address: hexlify(p.address),
           fromBlock: p.fromBlock,
@@ -335,7 +348,7 @@ export const useEthereumMethods = ({
         return rpcProvider.request({ method: 'eth_newBlockFilter', params: [] })
       }
       case 'eth_newFilter': {
-        const p = params as EthNewFilterParams
+        const p = params as unknown as EthNewFilterParams
         const filter = {
           address: hexlify(p.address),
           fromBlock: p.fromBlock,
@@ -347,7 +360,7 @@ export const useEthereumMethods = ({
         return rpcProvider.request({ method: 'eth_syncing', params: [] })
       }
       case 'eth_uninstallFilter': {
-        const p = params as EthUninstallFilterParams
+        const p = params as unknown as EthUninstallFilterParams
         return rpcProvider.request({
           method: 'eth_uninstallFilter',
           params: [p.filterId],
@@ -364,7 +377,7 @@ export const useEthereumMethods = ({
       }
       case 'eth_signTypedData': {
         if (!signer) throw new Error('Wallet not connected')
-        const p = params as EthSignTypedDataParams
+        const p = params as unknown as EthSignTypedDataParams
         const domain = {
           name: p.domain,
           version: p.version,
@@ -376,7 +389,11 @@ export const useEthereumMethods = ({
           to: { name: p.to_name, wallet: p.to_wallet },
           contents: p.contents,
         }
-        const signature = await signer.signTypedData(domain, eip712Types, value)
+        const signature = await signer.signTypedData(
+          domain,
+          eip712Types as unknown as Record<string, TypedDataField[]>,
+          value,
+        )
         sendSignMsg(signature)
         return signature
       }

@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { BrowserProvider } from 'ethers'
 import {
   useAppKitState,
   useAppKitTheme,
@@ -31,10 +30,10 @@ export const InfoList = ({ hash, txId, signedMsg, nodes, lastFunctionResult }: I
 
   useEffect(() => {
     const checkTransactionStatus = async () => {
-      if (!walletProvider) return
+      if (!walletProvider || chainId === undefined) return
       if (isEthChain && hash) {
         try {
-          const rpcProvider = (walletProvider.rpcProviders as any)?.eip155?.httpProviders?.[chainId]
+          const rpcProvider = (walletProvider.rpcProviders as any)?.eip155?.httpProviders?.[chainId as number]
           const receipt = await rpcProvider.request({
             method: 'eth_getTransactionReceipt',
             params: [hash],

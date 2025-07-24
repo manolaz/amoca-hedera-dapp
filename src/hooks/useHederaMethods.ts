@@ -54,7 +54,7 @@ export const useHederaMethods = (
         return result.transactionId
       }
       case 'hedera_signMessage': {
-        const p = params as HederaSignMessageParams
+        const p = params as unknown as HederaSignMessageParams
         const signParams: SignMessageParams = {
           signerAccountId: 'hedera:testnet:' + address,
           message: p.message,
@@ -64,7 +64,7 @@ export const useHederaMethods = (
         return signatureMap
       }
       case 'hedera_signTransaction': {
-        const p = params as HederaSignTransactionParams
+        const p = params as unknown as HederaSignTransactionParams
         const accountId = address
         const hbarAmount = new Hbar(Number(p.amount))
         const transaction = new TransferTransaction()
@@ -81,7 +81,7 @@ export const useHederaMethods = (
         return 'Transaction signed successfully'
       }
       case 'hedera_signAndExecuteTransaction': {
-        const p = params as HederaSignAndExecuteTransactionParams
+        const p = params as unknown as HederaSignAndExecuteTransactionParams
         const accountId = address
         const hbarAmount = new Hbar(Number(p.amount))
         const transaction = new TransferTransaction()

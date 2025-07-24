@@ -47,7 +47,7 @@ export const ActionButtonList = ({
 
   const { executeEthMethod } = useEthereumMethods({
     walletProvider: isConnected ? (walletProvider as HederaProvider) : undefined,
-    chainId: isConnected ? chainId : undefined,
+    chainId: isConnected ? Number(chainId) : undefined,
     address: isConnected ? address! : undefined,
     ethTxHash,
     sendHash,
