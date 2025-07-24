@@ -8,8 +8,7 @@
     "lint": "eslint .",
     "prettier": "prettier --write .",
     "preview": "vite preview",
-    "test": "vitest",
-    "coverage": "vitest run --coverage"
+    "test": "npm run build && vitest run --coverage"
   },
   "dependencies": {
     "@hashgraph/hedera-wallet-connect": "^2.0.1-canary.0b06f5b.0",
