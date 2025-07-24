@@ -10,15 +10,31 @@ export interface ModalProps {
   isLoading?: boolean
 }
 
-export const Modal = ({ isOpen, onClose, onSubmit, title, fields, isLoading = false }: ModalProps) => {
+export const Modal = ({
+  isOpen,
+  onClose,
+  onSubmit,
+  title,
+  fields,
+  isLoading = false,
+}: ModalProps) => {
   const [formValues, setFormValues] = useState<Record<string, string>>({})
+
+  useEffect(() => {
+    if (!isOpen) return
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', handleKey)
+    return () => document.removeEventListener('keydown', handleKey)
+  }, [isOpen, onClose])
 
   // Initialize form values with defaults or localStorage values
   useEffect(() => {
     if (isOpen) {
       const initialValues: Record<string, string> = {}
 
-      fields.forEach(field => {
+      fields.forEach((field) => {
         const storedValue = localStorage.getItem(`param_${field.name}`)
         initialValues[field.name] = storedValue || field.defaultValue || ''
       })
@@ -28,7 +44,7 @@ export const Modal = ({ isOpen, onClose, onSubmit, title, fields, isLoading = fa
   }, [isOpen, fields])
 
   const handleChange = (name: string, value: string) => {
-    setFormValues(prev => ({ ...prev, [name]: value }))
+    setFormValues((prev) => ({ ...prev, [name]: value }))
   }
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -44,10 +60,14 @@ export const Modal = ({ isOpen, onClose, onSubmit, title, fields, isLoading = fa
     onSubmit(formValues)
   }
 
+  const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) onClose()
+  }
+
   if (!isOpen) return null
 
   return (
-    <div className="modal-overlay">
+    <div className="modal-overlay" onClick={handleOverlayClick}>
       <div className="modal-content">
         <h2>{title}</h2>
         <form onSubmit={handleSubmit}>
