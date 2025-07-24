@@ -30,15 +30,16 @@ vi.mock('ethers', () => {
     async getBalance() { return 1n }
     async send() { return 'rawHash' }
   }
-  class JsonRpcProvider {
-    constructor(_: any) {}
-  }
   class JsonRpcSigner {
     constructor(_: any, __: any) {}
     async sendTransaction() { return { hash: 'txHash' } }
     async signTransaction() { return 'signedTx' }
     async signMessage() { return 'signature' }
     async signTypedData() { return 'typedSignature' }
+  }
+  class JsonRpcProvider {
+    constructor(_: any) {}
+    async request({ method }: any) { return method + '_result' }
   }
   return {
     BrowserProvider,
@@ -67,7 +68,7 @@ vi.mock('@hashgraph/hedera-wallet-connect', () => ({
   HederaProvider: { init: vi.fn().mockResolvedValue({}) },
   HederaAdapter: class {},
   HederaChainDefinition: {
-    Native: { Mainnet: 'mainnet', Testnet: 'testnet' },
+    Native: { Mainnet: 'native-mainnet', Testnet: 'native-testnet' },
     EVM: { Mainnet: 'evm-mainnet', Testnet: 'evm-testnet' },
   },
   hederaNamespace: 'hedera',
@@ -100,9 +101,15 @@ vi.mock('@reown/appkit/react', () => ({
 }))
 
 beforeEach(() => {
+  vi.resetModules()
+  process.env.VITE_REOWN_PROJECT_ID = 'test'
   activeChain = 'eip155'
   walletProvider = createWalletProviderMock()
   process.env.VITE_REOWN_PROJECT_ID = 'pid'
+})
+
+afterEach(() => {
+  delete process.env.VITE_REOWN_PROJECT_ID
 })
 
 afterEach(() => {
