@@ -34,8 +34,11 @@ export const InfoList = ({ hash, txId, signedMsg, nodes, lastFunctionResult }: I
       if (!walletProvider) return
       if (isEthChain && hash) {
         try {
-          const provider = new BrowserProvider(walletProvider, chainId)
-          const receipt = await provider.getTransactionReceipt(hash)
+          const rpcProvider = (walletProvider.rpcProviders as any)?.eip155?.httpProviders?.[chainId]
+          const receipt = await rpcProvider.request({
+            method: 'eth_getTransactionReceipt',
+            params: [hash],
+          })
           setStatusEthTx(
             receipt?.status === 1 ? 'Success' : receipt?.status === 0 ? 'Failed' : 'Pending',
           )

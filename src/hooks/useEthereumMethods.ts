@@ -6,6 +6,7 @@ import {
   parseEther,
   getBigInt,
   hexlify,
+  toQuantity,
   BigNumberish,
 } from 'ethers'
 import { HederaProvider } from '@hashgraph/hedera-wallet-connect'
@@ -113,27 +114,45 @@ export const useEthereumMethods = ({
 
   const browserProvider = new BrowserProvider(walletProvider, chainId)
   const signer = new JsonRpcSigner(browserProvider, address)
+  const rpcProvider =
+    (walletProvider.rpcProviders as any)?.eip155?.httpProviders?.[chainId]
 
   const execute = async (methodName: string, params: Record<string, string>) => {
     switch (methodName) {
       case 'eth_getBalance': {
-        const balance = await browserProvider.getBalance((params as any).address)
-        return formatEther(balance)
+        const balance = await rpcProvider.request({
+          method: 'eth_getBalance',
+          params: [(params as any).address, 'latest'],
+        })
+        return formatEther(getBigInt(balance as any))
       }
       case 'eth_chainId': {
-        return await walletProvider.eth_chainId()
+        return await rpcProvider.request({ method: 'eth_chainId', params: [] })
       }
       case 'eth_blockNumber': {
-        const bn = await walletProvider.eth_blockNumber()
-        return getBigInt(bn)
+        const bn = await rpcProvider.request({
+          method: 'eth_blockNumber',
+          params: [],
+        })
+        return getBigInt(bn as any)
       }
       case 'eth_feeHistory': {
         const p = params as EthFeeHistoryParams
-        const history = await walletProvider.eth_feeHistory(+p.blockCount, p.newestBlock, [])
+        const history = await rpcProvider.request({
+          method: 'eth_feeHistory',
+          params: [
+            toQuantity(+p.blockCount),
+            p.newestBlock,
+            [] as number[],
+          ],
+        })
         return JSON.stringify(history)
       }
       case 'eth_gasPrice': {
-        const price = (await walletProvider.eth_gasPrice()) as BigNumberish
+        const price = (await rpcProvider.request({
+          method: 'eth_gasPrice',
+          params: [],
+        })) as BigNumberish
         return getBigInt(price)
       }
       case 'eth_sendTransaction': {
@@ -160,9 +179,12 @@ export const useEthereumMethods = ({
       }
       case 'eth_sendRawTransaction': {
         if (!signedEthTx) throw Error('Transaction not signed, use eth_signTransaction first')
-        const txHash = await browserProvider.send('eth_sendRawTransaction', [signedEthTx])
+        const txHash = await rpcProvider.request({
+          method: 'eth_sendRawTransaction',
+          params: [signedEthTx],
+        })
         setSignedEthTx(undefined)
-        sendHash(txHash)
+        sendHash(txHash as string)
         return txHash
       }
       case 'eth_signMessage': {
@@ -173,88 +195,121 @@ export const useEthereumMethods = ({
       }
       case 'eth_call': {
         const p = params as EthCallParams
-        return walletProvider.eth_call({ to: p.to, data: p.data })
+        return rpcProvider.request({
+          method: 'eth_call',
+          params: [{ to: p.to, data: p.data }, 'latest'],
+        })
       }
       case 'eth_getCode': {
         const p = params as EthGetCodeParams
-        return walletProvider.eth_getCode(p.address, p.blockTag)
+        return rpcProvider.request({
+          method: 'eth_getCode',
+          params: [p.address, p.blockTag],
+        })
       }
       case 'eth_getStorageAt': {
         const p = params as EthGetStorageAtParams
-        return walletProvider.eth_getStorageAt(p.address, p.position, p.blockTag)
+        return rpcProvider.request({
+          method: 'eth_getStorageAt',
+          params: [p.address, p.position, p.blockTag],
+        })
       }
       case 'eth_getTransactionByHash': {
         const p = params as EthGetTransactionByHashParams
         const hash = p.hash || ethTxHash
-        const tx = await walletProvider.eth_getTransactionByHash(hash)
+        const tx = await rpcProvider.request({
+          method: 'eth_getTransactionByHash',
+          params: [hash],
+        })
         return tx ? JSON.stringify(tx) : 'Transaction not found'
       }
       case 'eth_getTransactionCount': {
-        const count = await walletProvider.eth_getTransactionCount(address, 'latest')
-        return getBigInt(count)
+        const count = await rpcProvider.request({
+          method: 'eth_getTransactionCount',
+          params: [address, 'latest'],
+        })
+        return getBigInt(count as any)
       }
       case 'eth_getTransactionReceipt': {
         const p = params as EthGetTransactionByHashParams
         const hash = p.hash || ethTxHash
-        const receipt = await walletProvider.eth_getTransactionReceipt(hash)
+        const receipt = await rpcProvider.request({
+          method: 'eth_getTransactionReceipt',
+          params: [hash],
+        })
         return receipt ? JSON.stringify(receipt) : 'Receipt not found'
       }
       case 'eth_maxPriorityFeePerGas': {
-        const fee = await walletProvider.eth_maxPriorityFeePerGas()
-        return getBigInt(fee)
+        const fee = await rpcProvider.request({
+          method: 'eth_maxPriorityFeePerGas',
+          params: [],
+        })
+        return getBigInt(fee as any)
       }
       case 'eth_getBlockByHash': {
         const p = params as EthGetBlockByHashParams
         return (
-          (await walletProvider.eth_getBlockByHash(
-            p.blockHash,
-            p.includeTransactions === 'true',
-          )) || 'Block not found'
+          (await rpcProvider.request({
+            method: 'eth_getBlockByHash',
+            params: [p.blockHash, p.includeTransactions === 'true'],
+          })) || 'Block not found'
         )
       }
       case 'eth_getBlockByNumber': {
         const p = params as EthGetBlockByNumberParams
         return (
-          (await walletProvider.eth_getBlockByNumber(
-            p.blockTag,
-            (p as any).includeTransactions === 'true',
-          )) || 'Block not found'
+          (await rpcProvider.request({
+            method: 'eth_getBlockByNumber',
+            params: [p.blockTag, (p as any).includeTransactions === 'true'],
+          })) || 'Block not found'
         )
       }
       case 'eth_getBlockTransactionCountByHash': {
         const p = params as EthGetBlockTransactionCountByHashParams
-        const count = await walletProvider.eth_getBlockTransactionCountByHash(p.blockHash)
-        return getBigInt(count)
+        const count = await rpcProvider.request({
+          method: 'eth_getBlockTransactionCountByHash',
+          params: [p.blockHash],
+        })
+        return getBigInt(count as any)
       }
       case 'eth_getBlockTransactionCountByNumber': {
         const p = params as EthGetBlockTransactionCountByNumberParams
-        const count = await walletProvider.eth_getBlockTransactionCountByNumber(p.blockTag)
-        return getBigInt(count)
+        const count = await rpcProvider.request({
+          method: 'eth_getBlockTransactionCountByNumber',
+          params: [p.blockTag],
+        })
+        return getBigInt(count as any)
       }
       case 'eth_getFilterLogs': {
         const p = params as EthFilterParams
-        const logs = await walletProvider.eth_getFilterLogs(p.filterId)
+        const logs = await rpcProvider.request({
+          method: 'eth_getFilterLogs',
+          params: [p.filterId],
+        })
         return JSON.stringify(logs)
       }
       case 'eth_getFilterChanges': {
         const p = params as EthFilterParams
-        const changes = await walletProvider.eth_getFilterChanges(p.filterId)
+        const changes = await rpcProvider.request({
+          method: 'eth_getFilterChanges',
+          params: [p.filterId],
+        })
         return JSON.stringify(changes)
       }
       case 'eth_getTransactionByBlockHashAndIndex': {
         const p = params as EthGetTransactionByBlockHashAndIndexParams
-        const tx = await walletProvider.eth_getTransactionByBlockHashAndIndex(
-          p.blockHash,
-          p.index,
-        )
+        const tx = await rpcProvider.request({
+          method: 'eth_getTransactionByBlockHashAndIndex',
+          params: [p.blockHash, p.index],
+        })
         return JSON.stringify(tx)
       }
       case 'eth_getTransactionByBlockNumberAndIndex': {
         const p = params as EthGetTransactionByBlockNumberAndIndexParams
-        const tx = await walletProvider.eth_getTransactionByBlockNumberAndIndex(
-          p.blockNumber,
-          p.index,
-        )
+        const tx = await rpcProvider.request({
+          method: 'eth_getTransactionByBlockNumberAndIndex',
+          params: [p.blockNumber, p.index],
+        })
         return JSON.stringify(tx)
       }
       case 'eth_getLogs': {
@@ -264,13 +319,13 @@ export const useEthereumMethods = ({
           fromBlock: p.fromBlock,
           toBlock: p.toBlock,
         }
-        return walletProvider.eth_getLogs(filter)
+        return rpcProvider.request({ method: 'eth_getLogs', params: [filter] })
       }
       case 'eth_mining': {
-        return walletProvider.eth_mining()
+        return rpcProvider.request({ method: 'eth_mining', params: [] })
       }
       case 'eth_newBlockFilter': {
-        return walletProvider.eth_newBlockFilter()
+        return rpcProvider.request({ method: 'eth_newBlockFilter', params: [] })
       }
       case 'eth_newFilter': {
         const p = params as EthNewFilterParams
@@ -279,23 +334,26 @@ export const useEthereumMethods = ({
           fromBlock: p.fromBlock,
           toBlock: p.toBlock,
         }
-        return walletProvider.eth_newFilter(filter)
+        return rpcProvider.request({ method: 'eth_newFilter', params: [filter] })
       }
       case 'eth_syncing': {
-        return walletProvider.eth_syncing()
+        return rpcProvider.request({ method: 'eth_syncing', params: [] })
       }
       case 'eth_uninstallFilter': {
         const p = params as EthUninstallFilterParams
-        return walletProvider.eth_uninstallFilter(p.filterId)
+        return rpcProvider.request({
+          method: 'eth_uninstallFilter',
+          params: [p.filterId],
+        })
       }
       case 'net_listening': {
-        return walletProvider.net_listening()
+        return rpcProvider.request({ method: 'net_listening', params: [] })
       }
       case 'net_version': {
-        return walletProvider.net_version()
+        return rpcProvider.request({ method: 'net_version', params: [] })
       }
       case 'web3_clientVersion': {
-        return walletProvider.web3_clientVersion()
+        return rpcProvider.request({ method: 'web3_clientVersion', params: [] })
       }
       case 'eth_signTypedData': {
         const p = params as EthSignTypedDataParams

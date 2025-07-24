@@ -5,7 +5,8 @@ let activeChain: string
 let walletProvider: any
 
 function createWalletProviderMock() {
-  return new Proxy({}, {
+  const httpProvider = { request: vi.fn(async ({ method }: any) => method + '_result') }
+  return new Proxy({ rpcProviders: { eip155: { httpProviders: { 1: httpProvider } } } }, {
     get(target, prop: string) {
       if (!target[prop]) {
         if (prop === 'hedera_signAndExecuteQuery') {

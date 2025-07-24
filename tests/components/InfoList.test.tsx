@@ -5,12 +5,7 @@ import React from 'react'
 let activeChain: string
 let walletProvider: any
 
-vi.mock('ethers', () => ({
-  BrowserProvider: class {
-    constructor(_: any, __: any) {}
-    async getTransactionReceipt() { return { status: 1 } }
-  }
-}))
+vi.mock('ethers', () => ({}))
 
 vi.mock('@reown/appkit/react', () => ({
   useAppKitTheme: () => ({ themeMode: 'light', themeVariables: { c: '1' } }),
@@ -23,7 +18,9 @@ vi.mock('@reown/appkit/react', () => ({
 
 beforeEach(() => {
   activeChain = 'eip155'
-  walletProvider = {}
+  walletProvider = {
+    rpcProviders: { eip155: { httpProviders: { 1: { request: vi.fn(async () => ({ status: 1 })) } } } },
+  }
 })
 
 describe('InfoList', () => {
