@@ -218,3 +218,7 @@ a {
   background-color: #e0e0e0;
   color: black;
 }
+
+hr {
+  margin: 2rem 0;
+}

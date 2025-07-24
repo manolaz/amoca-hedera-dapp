@@ -159,11 +159,9 @@ export const ActionButtonList = ({
       <>
         {isConnected && (
           <>
-            <br />
-            <hr />
             <div>
-              <br />
-              <strong>EIP-155 Methods (Wallet):</strong>
+              <h2>EIP-155 Methods (Wallet):</h2>
+              <hr />
             </div>
             <div>
               {createMethodButton('eth_signMessage')}
@@ -177,8 +175,8 @@ export const ActionButtonList = ({
         {isConnected && activeChain == ('hedera' as ChainNamespace) && (
           <>
             <div>
-              <br />
-              <strong>HIP-820 Methods:</strong>
+              <h2>HIP-820 Methods:</h2>
+              <hr />
             </div>
             <div>
               {createMethodButton('hedera_getNodeAddresses')}
@@ -192,8 +190,8 @@ export const ActionButtonList = ({
         )}
         <hr />
         <div>
-          <br />
-          <strong>EIP-155 Methods called directly by a dApp to a JSON-RPC provider</strong>
+          <h2>EIP-155 Methods called directly by a dApp to a JSON-RPC provider</h2>
+          <hr />
         </div>
 
         <div>
