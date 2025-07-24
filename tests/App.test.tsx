@@ -4,6 +4,7 @@ import '@testing-library/jest-dom/vitest'
 
 vi.mock('@reown/appkit/react', () => ({
   createAppKit: vi.fn(),
+  useDisconnect: () => ({ disconnect: vi.fn() }),
 }))
 
 vi.mock('../src/components/ActionButtonList', () => ({
@@ -14,14 +15,17 @@ vi.mock('../src/components/InfoList', () => ({
   InfoList: () => <div data-testid="info-list" />,
 }))
 
-vi.mock('../src/config', () => ({
-  projectId: 'test',
-  metadata: {},
-  networks: [],
-  nativeHederaAdapter: {},
-  eip155HederaAdapter: {},
-  universalProvider: {},
-}))
+vi.mock('../src/config', () => {
+  const events = { on: vi.fn(), off: vi.fn() }
+  return {
+    projectId: 'test',
+    metadata: {},
+    networks: [],
+    nativeHederaAdapter: {},
+    eip155HederaAdapter: {},
+    universalProvider: { on: vi.fn(), off: vi.fn(), core: { pairing: { events } } },
+  }
+})
 
 import App from '../src/App'
 

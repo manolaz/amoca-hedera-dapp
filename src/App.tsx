@@ -1,7 +1,7 @@
 import './App.css'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { hederaTestnet } from '@reown/appkit/networks'
-import { createAppKit } from '@reown/appkit/react'
+import { createAppKit, useDisconnect } from '@reown/appkit/react'
 import { ActionButtonList } from './components/ActionButtonList'
 import { InfoList } from './components/InfoList'
 import {
@@ -38,11 +38,28 @@ export interface FunctionResult {
 }
 
 export function App() {
+  const { disconnect } = useDisconnect()
   const [transactionHash, setTransactionHash] = useState('')
   const [transactionId, setTransactionId] = useState('')
   const [signedMsg, setSignedMsg] = useState('')
   const [nodes, setNodes] = useState<string[]>([])
   const [lastFunctionResult, setLastFunctionResult] = useState<FunctionResult | null>(null)
+
+  useEffect(() => {
+    const handleDisconnect = () => {
+      if (universalProvider.session?.namespaces?.eip155) {
+        disconnect().catch((err) => console.error('Failed to auto disconnect:', err))
+      }
+    }
+
+    universalProvider.on('session_delete', handleDisconnect)
+    universalProvider.core?.pairing.events?.on('pairing_delete', handleDisconnect as any)
+
+    return () => {
+      universalProvider.off('session_delete', handleDisconnect)
+      universalProvider.core?.pairing.events?.off('pairing_delete', handleDisconnect as any)
+    }
+  }, [disconnect])
 
   return (
     <div className="pages">
