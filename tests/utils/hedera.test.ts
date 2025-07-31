@@ -13,4 +13,8 @@ describe('toEvmAddress', () => {
   it('returns input for invalid format', () => {
     expect(toEvmAddress('foo')).toBe('foo')
   })
+
+  it('returns input when BigInt conversion fails', () => {
+    expect(toEvmAddress('0.0.invalid')).toBe('0.0.invalid')
+  })
 })

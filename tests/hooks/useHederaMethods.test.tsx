@@ -82,7 +82,23 @@ describe('useHederaMethods', () => {
     })
   })
 
+  it('signs and executes transaction in one call', async () => {
+    await act(async () => {
+      const res = await execute('hedera_signAndExecuteTransaction', { recipientId: '0.0.1', amount: '1' })
+      expect(res).toBe('tid')
+    })
+    expect(sendTxId).toHaveBeenCalledWith('tid')
+    expect(walletProvider.hedera_signAndExecuteTransaction).toHaveBeenCalledWith({
+      signerAccountId: 'hedera:testnet:0.0.1234',
+      transactionList: 'tx'
+    })
+  })
+
   it('throws for unsupported method', async () => {
     await expect(execute('unknown', {})).rejects.toThrow('Unsupported Hedera method')
+  })
+
+  it('throws when executing transaction without signing first', async () => {
+    await expect(execute('hedera_executeTransaction', {})).rejects.toThrow('Transaction not signed, use hedera_signTransaction first')
   })
 })

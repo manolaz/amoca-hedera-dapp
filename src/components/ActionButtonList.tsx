@@ -108,7 +108,7 @@ export const ActionButtonList = ({
         result: typeof result === 'object' ? JSON.stringify(result) : String(result || ''),
       })
       // Show result in an alert for quick feedback
-      if (typeof window !== 'undefined') {
+      if (typeof window !== 'undefined' && window.alert) {
         window.alert(typeof result === 'object' ? JSON.stringify(result) : String(result || ''))
       }
     } catch (error) {
@@ -117,7 +117,7 @@ export const ActionButtonList = ({
         functionName: methodName,
         result: `Error: ${(error as Error).message}`,
       })
-      if (typeof window !== 'undefined') {
+      if (typeof window !== 'undefined' && window.alert) {
         window.alert(`Error: ${(error as Error).message}`)
       }
     } finally {

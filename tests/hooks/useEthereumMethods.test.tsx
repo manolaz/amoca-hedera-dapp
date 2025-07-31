@@ -11,6 +11,7 @@ vi.mock('ethers', () => {
     async signTransaction() { return 'signedTx' }
     async signMessage() { return 'signature' }
     async signTypedData() { return 'typedSignature' }
+    async _signMessage() { return 'signature' }
   }
   return {
     BrowserProvider,
@@ -209,5 +210,181 @@ describe('useEthereumMethods', () => {
       expect(res).toBe('5')
     })
     expect(sendMock).toHaveBeenCalledWith('eth_getBalance', ['0xabc', 'latest'])
+  })
+
+  it('signs messages with personal_sign', async () => {
+    await act(async () => {
+      const sig = await execute('personal_sign', { message: 'test message' })
+      expect(sig).toBe('signature')
+      expect(sendSignMsg).toHaveBeenCalledWith('signature')
+    })
+  })
+
+  it('signs messages with eth_sign', async () => {
+    await act(async () => {
+      const sig = await execute('eth_sign', { message: 'test message' })
+      expect(sig).toBe('signature')
+      expect(sendSignMsg).toHaveBeenCalledWith('signature')
+    })
+  })
+
+  it('signs typed data v3', async () => {
+    await act(async () => {
+      const sig = await execute('eth_signTypedData_v3', {
+        domain: 'test',
+        version: '1',
+        verifyingContract: '0x1',
+        from_name: 'Alice',
+        from_wallet: '0x2',
+        to_name: 'Bob',
+        to_wallet: '0x3',
+        contents: 'Hello'
+      })
+      expect(sig).toBe('typedSignature')
+      expect(sendSignMsg).toHaveBeenCalledWith('typedSignature')
+    })
+  })
+
+  it('signs typed data v4', async () => {
+    await act(async () => {
+      const sig = await execute('eth_signTypedData_v4', {
+        domain: 'test',
+        version: '1',
+        verifyingContract: '0x1',
+        from_name: 'Alice',
+        from_wallet: '0x2',
+        to_name: 'Bob',
+        to_wallet: '0x3',
+        contents: 'Hello'
+      })
+      expect(sig).toBe('typedSignature')
+      expect(sendSignMsg).toHaveBeenCalledWith('typedSignature')
+    })
+  })
+
+  it('handles eth_feeHistory with blockCount param', async () => {
+    await act(async () => {
+      const result = await execute('eth_feeHistory', {
+        blockCount: '10',
+        newestBlock: 'latest'
+      })
+      expect(JSON.parse(result)).toBe('0x1')
+    })
+  })
+
+  it('throws when signer missing for typed data methods', async () => {
+    const mod = await import('../../src/hooks/useEthereumMethods')
+    let execFn: any
+    function Wrapper({ onReady }: any) {
+      const { executeEthMethod } = mod.useEthereumMethods({
+        walletProvider: undefined,
+        chainId: undefined,
+        address: undefined,
+        ethTxHash: '0x0',
+        sendHash,
+        sendSignMsg,
+      })
+      useEffect(() => { onReady(executeEthMethod) }, [executeEthMethod, onReady])
+      return null
+    }
+    render(<Wrapper onReady={(fn: any) => { execFn = fn }} />)
+    
+    await expect(execFn('eth_signTypedData_v3', {
+      domain: 'test',
+      version: '1',
+      verifyingContract: '0x1',
+      from_name: 'Alice',
+      from_wallet: '0x2',
+      to_name: 'Bob',
+      to_wallet: '0x3',
+      contents: 'Hello'
+    })).rejects.toThrow('Wallet not connected')
+    
+    await expect(execFn('eth_signTypedData_v4', {
+      domain: 'test',
+      version: '1',
+      verifyingContract: '0x1',
+      from_name: 'Alice',
+      from_wallet: '0x2',
+      to_name: 'Bob',
+      to_wallet: '0x3',
+      contents: 'Hello'
+    })).rejects.toThrow('Wallet not connected')
+  })
+
+  it('handles null block responses', async () => {
+    // Mock provider that returns null for block queries
+    rpcProvider.request = vi.fn(async ({ method }: any) => {
+      switch (method) {
+        case 'eth_getBlockByHash':
+        case 'eth_getBlockByNumber':
+          return null
+        default:
+          return '0x1'
+      }
+    })
+    
+    await act(async () => {
+      const blockByHash = await execute('eth_getBlockByHash', { blockHash: '0x123', includeTransactions: 'false' })
+      expect(blockByHash).toBe('Block not found')
+      
+      const blockByNumber = await execute('eth_getBlockByNumber', { blockTag: 'latest', includeTransactions: 'false' })
+      expect(blockByNumber).toBe('Block not found')
+    })
+  })
+
+  it('handles eth_getBlockByNumber with includeTransactions', async () => {
+    rpcProvider.request = vi.fn(async () => ({ number: '0x1', transactions: [] }))
+    
+    await act(async () => {
+      const result = await execute('eth_getBlockByNumber', { blockTag: 'latest', includeTransactions: 'true' })
+      expect(result).toEqual({ number: '0x1', transactions: [] })
+    })
+    
+    expect(rpcProvider.request).toHaveBeenCalledWith({
+      method: 'eth_getBlockByNumber',
+      params: ['latest', true]
+    })
+  })
+
+  it('handles null transaction receipt', async () => {
+    rpcProvider.request = vi.fn(async ({ method }: any) => {
+      if (method === 'eth_getTransactionReceipt') return null
+      return '0x1'
+    })
+    
+    await act(async () => {
+      const receipt = await execute('eth_getTransactionReceipt', { hash: '0x123' })
+      expect(receipt).toBe('Receipt not found')
+    })
+  })
+
+  it('throws when signer missing for eth_signTypedData', async () => {
+    const mod = await import('../../src/hooks/useEthereumMethods')
+    let execFn: any
+    function Wrapper({ onReady }: any) {
+      const { executeEthMethod } = mod.useEthereumMethods({
+        walletProvider: undefined,
+        chainId: undefined,
+        address: undefined,
+        ethTxHash: '0x0',
+        sendHash,
+        sendSignMsg,
+      })
+      useEffect(() => { onReady(executeEthMethod) }, [executeEthMethod, onReady])
+      return null
+    }
+    render(<Wrapper onReady={(fn: any) => { execFn = fn }} />)
+    
+    await expect(execFn('eth_signTypedData', {
+      domain: 'test',
+      version: '1',
+      verifyingContract: '0x1',
+      from_name: 'Alice',
+      from_wallet: '0x2',
+      to_name: 'Bob',
+      to_wallet: '0x3',
+      contents: 'Hello'
+    })).rejects.toThrow('Wallet not connected')
   })
 })

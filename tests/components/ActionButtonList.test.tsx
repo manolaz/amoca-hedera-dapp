@@ -94,8 +94,10 @@ vi.mock('../../src/components/Modal', async () => {
   }
 })
 
+const disconnectMock = vi.fn()
+
 vi.mock('@reown/appkit/react', () => ({
-  useDisconnect: () => ({ disconnect: vi.fn() }),
+  useDisconnect: () => ({ disconnect: disconnectMock }),
   useAppKitAccount: () => ({ isConnected: true, address: '0xabc' }),
   useAppKitNetworkCore: () => ({ chainId: 1 }),
   useAppKitState: () => ({ activeChain }),
@@ -104,12 +106,14 @@ vi.mock('@reown/appkit/react', () => ({
 
 beforeEach(() => {
   vi.resetModules()
+  vi.clearAllMocks()
   process.env.VITE_REOWN_PROJECT_ID = 'test'
   activeChain = 'eip155'
   walletProvider = createWalletProviderMock()
   process.env.VITE_REOWN_PROJECT_ID = 'pid'
   alertMock = vi.fn()
   ;(global as any).alert = alertMock
+  disconnectMock.mockResolvedValue(undefined)
 })
 
 afterEach(() => {
@@ -201,5 +205,160 @@ describe('ActionButtonList', () => {
       expect(props.setLastFunctionResult).toHaveBeenCalled()
       expect(alertMock).toHaveBeenCalled()
     })
+  })
+
+  it('executes methods without modal configuration directly', async () => {
+    activeChain = 'eip155'
+    walletProvider = createWalletProviderMock()
+    
+    // Mock getMethodConfig to return undefined for a method (no modal needed)
+    vi.doMock('../../src/utils/methodConfigs', () => ({
+      getMethodConfig: vi.fn().mockReturnValue(undefined)
+    }))
+    
+    const { ActionButtonList } = await import('../../src/components/ActionButtonList')
+    render(<ActionButtonList {...props} />)
+
+    // Click on a method that doesn't have config (direct execution)
+    fireEvent.click(screen.getByText('eth_chainId'))
+
+    await waitFor(() => {
+      expect(props.setLastFunctionResult).toHaveBeenCalled()
+      expect(alertMock).toHaveBeenCalled()
+    })
+  })
+
+  it('handles method execution errors', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    activeChain = 'eip155'
+    // Create a provider that throws errors
+    const errorProvider = createWalletProviderMock()
+    errorProvider.rpcProviders.eip155.httpProviders[1].request = vi.fn().mockRejectedValue(new Error('Test error'))
+    walletProvider = errorProvider
+    
+    const { ActionButtonList } = await import('../../src/components/ActionButtonList')
+    render(<ActionButtonList {...props} />)
+
+    // Click on a method that will cause an error
+    fireEvent.click(screen.getByText('eth_chainId'))
+
+    await waitFor(() => {
+      expect(props.setLastFunctionResult).toHaveBeenCalledWith({
+        functionName: 'eth_chainId',
+        result: 'Error: Test error'
+      })
+      expect(alertMock).toHaveBeenCalledWith('Error: Test error')
+    })
+    
+    consoleSpy.mockRestore()
+  })
+
+  it('handles disconnect errors', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    disconnectMock.mockRejectedValueOnce(new Error('Disconnect failed'))
+    
+    const { ActionButtonList } = await import('../../src/components/ActionButtonList')
+    render(<ActionButtonList {...props} />)
+
+    // Click the disconnect button
+    fireEvent.click(screen.getByRole('button', { name: 'Disconnect' }))
+
+    await waitFor(() => {
+      expect(disconnectMock).toHaveBeenCalled()
+      expect(consoleSpy).toHaveBeenCalledWith('Failed to disconnect:', expect.any(Error))
+    })
+
+    consoleSpy.mockRestore()
+  })
+
+  it('handles object results in alerts', async () => {
+    // Mock a method that returns an object result
+    walletProvider.rpcProviders.eip155.httpProviders[1].request = vi.fn().mockResolvedValue({ status: 1, data: 'test' })
+    
+    const { ActionButtonList } = await import('../../src/components/ActionButtonList')
+    render(<ActionButtonList {...props} />)
+
+    fireEvent.click(screen.getByText('eth_chainId'))
+
+    await waitFor(() => {
+      expect(alertMock).toHaveBeenCalledWith('{"status":1,"data":"test"}')
+      expect(props.setLastFunctionResult).toHaveBeenCalledWith({
+        functionName: 'eth_chainId',
+        result: '{"status":1,"data":"test"}'
+      })
+    })
+  })
+
+  it('handles null/undefined results', async () => {
+    // Mock a method that returns null
+    const nullProvider = createWalletProviderMock()
+    nullProvider.rpcProviders.eip155.httpProviders[1].request = vi.fn().mockResolvedValue(null)
+    walletProvider = nullProvider
+    
+    const { ActionButtonList } = await import('../../src/components/ActionButtonList')
+    render(<ActionButtonList {...props} />)
+
+    fireEvent.click(screen.getByText('eth_chainId'))
+
+    await waitFor(() => {
+      expect(alertMock).toHaveBeenCalledWith('null')
+      expect(props.setLastFunctionResult).toHaveBeenCalledWith({
+        functionName: 'eth_chainId',
+        result: 'null'
+      })
+    })
+  })
+
+  it('works without window alert', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    // Mock an error provider that will cause the error path to execute
+    const errorProvider = createWalletProviderMock()
+    errorProvider.rpcProviders.eip155.httpProviders[1].request = vi.fn().mockRejectedValue(new Error('Test error'))
+    walletProvider = errorProvider
+    
+    // Mock window.alert as undefined to test the window check
+    const originalAlert = window.alert
+    Object.defineProperty(window, 'alert', {
+      value: undefined,
+      writable: true,
+      configurable: true
+    })
+    
+    const { ActionButtonList } = await import('../../src/components/ActionButtonList')
+    render(<ActionButtonList {...props} />)
+
+    fireEvent.click(screen.getByText('eth_chainId'))
+
+    await waitFor(() => {
+      expect(props.setLastFunctionResult).toHaveBeenCalledWith({
+        functionName: 'eth_chainId',
+        result: 'Error: Test error'
+      })
+    })
+
+    // Restore alert
+    Object.defineProperty(window, 'alert', {
+      value: originalAlert,
+      writable: true,
+      configurable: true
+    })
+    
+    consoleSpy.mockRestore()
+  })
+
+  it('handles disconnected state', async () => {
+    vi.doMock('@reown/appkit/react', () => ({
+      useDisconnect: () => ({ disconnect: disconnectMock }),
+      useAppKitAccount: () => ({ isConnected: false, address: undefined }),
+      useAppKitNetworkCore: () => ({ chainId: undefined }),
+      useAppKitState: () => ({ activeChain: null }),
+      useAppKitProvider: () => ({ walletProvider: undefined }),
+    }))
+
+    const { ActionButtonList } = await import('../../src/components/ActionButtonList')
+    render(<ActionButtonList {...props} />)
+
+    // Should still render buttons
+    expect(screen.getByText('eth_chainId')).toBeInTheDocument()
   })
 })
