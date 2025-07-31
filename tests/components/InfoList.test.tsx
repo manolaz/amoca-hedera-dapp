@@ -138,20 +138,26 @@ describe('InfoList', () => {
     selectedNetworkId = 'eip155:295'
 
     const { InfoList } = await import('../../src/components/InfoList')
-    render(<InfoList hash="0x1" txId="" signedMsg="" nodes={[]} lastFunctionResult={null} />)
+    const { rerender } = render(<InfoList hash="0x1" txId="" signedMsg="" nodes={[]} lastFunctionResult={null} />)
 
-    const link = screen.getByRole('link', { name: '0x1' })
-    expect(link).toHaveAttribute('href', 'https://hashscan.io/transaction/0x1')
+    // Wait for any async effects to complete
+    await waitFor(() => {
+      const link = screen.getByRole('link', { name: '0x1' })
+      expect(link).toHaveAttribute('href', 'https://hashscan.io/transaction/0x1')
+    })
   })
 
   it('shows testnet hashscan link for eip155 testnet', async () => {
     selectedNetworkId = 'eip155:296'
 
     const { InfoList } = await import('../../src/components/InfoList')
-    render(<InfoList hash="0x1" txId="" signedMsg="" nodes={[]} lastFunctionResult={null} />)
+    const { rerender } = render(<InfoList hash="0x1" txId="" signedMsg="" nodes={[]} lastFunctionResult={null} />)
 
-    const link = screen.getByRole('link', { name: '0x1' })
-    expect(link).toHaveAttribute('href', 'https://hashscan.io/testnet/transaction/0x1')
+    // Wait for any async effects to complete
+    await waitFor(() => {
+      const link = screen.getByRole('link', { name: '0x1' })
+      expect(link).toHaveAttribute('href', 'https://hashscan.io/testnet/transaction/0x1')
+    })
   })
 
   it('shows mainnet hashscan link for hedera mainnet', async () => {
