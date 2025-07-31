@@ -12,7 +12,7 @@ describe('ErrorBoundary', () => {
     render(
       <ErrorBoundary>
         <div>Child</div>
-      </ErrorBoundary>
+      </ErrorBoundary>,
     )
     expect(screen.getByText('Child')).toBeInTheDocument()
   })
@@ -22,7 +22,7 @@ describe('ErrorBoundary', () => {
     render(
       <ErrorBoundary>
         <ProblemChild />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     )
     expect(screen.getByRole('alert')).toHaveTextContent('Something went wrong.')
     ;(console.error as unknown as { mockRestore: () => void }).mockRestore()

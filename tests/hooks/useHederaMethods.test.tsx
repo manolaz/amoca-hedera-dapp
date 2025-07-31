@@ -4,13 +4,42 @@ import { describe, it, beforeEach, expect, vi } from 'vitest'
 import { useHederaMethods } from '../../src/hooks/useHederaMethods'
 
 vi.mock('@hashgraph/sdk', () => {
-  class Hbar { constructor(_: number) {} negated() { return this } }
-  class TransferTransaction { setTransactionId() { return this } addHbarTransfer() { return this } setMaxTransactionFee() { return this } freezeWith() { return this } }
+  class Hbar {
+    constructor(_: number) {}
+    negated() {
+      return this
+    }
+  }
+  class TransferTransaction {
+    setTransactionId() {
+      return this
+    }
+    addHbarTransfer() {
+      return this
+    }
+    setMaxTransactionFee() {
+      return this
+    }
+    freezeWith() {
+      return this
+    }
+  }
   const TransactionId = { generate: () => 'tid' }
-  class AccountInfoQuery { setAccountId() { return this } }
+  class AccountInfoQuery {
+    setAccountId() {
+      return this
+    }
+  }
   const AccountInfo = { fromBytes: () => ({ info: 'data' }) }
   class Transaction {}
-  return { Hbar, TransferTransaction, TransactionId, AccountInfoQuery, AccountInfo, Transaction }
+  return {
+    Hbar,
+    TransferTransaction,
+    TransactionId,
+    AccountInfoQuery,
+    AccountInfo,
+    Transaction,
+  }
 })
 
 vi.mock('@hashgraph/hedera-wallet-connect', () => ({
@@ -34,10 +63,18 @@ describe('useHederaMethods', () => {
         sendSignMsg,
         sendNodeAddresses,
       )
-      useEffect(() => { onReady(executeHederaMethod) }, [executeHederaMethod, onReady])
+      useEffect(() => {
+        onReady(executeHederaMethod)
+      }, [executeHederaMethod, onReady])
       return null
     }
-    render(<Wrapper onReady={(fn: any) => { execute = fn }} />)
+    render(
+      <Wrapper
+        onReady={(fn: any) => {
+          execute = fn
+        }}
+      />,
+    )
   }
 
   beforeEach(() => {
@@ -48,7 +85,9 @@ describe('useHederaMethods', () => {
       hedera_executeTransaction: vi.fn(async () => ({ transactionId: 'tid' })),
       hedera_signAndExecuteTransaction: vi.fn(async () => ({ transactionId: 'tid' })),
       hedera_signTransaction: vi.fn(async () => ({ tx: true })),
-      hedera_signAndExecuteQuery: vi.fn(async () => ({ response: Buffer.from('data').toString('base64') })),
+      hedera_signAndExecuteQuery: vi.fn(async () => ({
+        response: Buffer.from('data').toString('base64'),
+      })),
       hedera_getNodeAddresses: vi.fn(async () => ({ nodes: ['n1'] })),
       hedera_signMessage: vi.fn(async () => ({ signatureMap: 'sig' })),
     }
@@ -57,7 +96,11 @@ describe('useHederaMethods', () => {
 
   it('signs then executes a transaction', async () => {
     await act(async () => {
-      const res = await execute('hedera_signTransaction', { recipientId: '0.0.1', amount: '1', maxFee: '1' })
+      const res = await execute('hedera_signTransaction', {
+        recipientId: '0.0.1',
+        amount: '1',
+        maxFee: '1',
+      })
       expect(res).toBe('Transaction signed successfully')
     })
     await act(async () => {
@@ -84,13 +127,16 @@ describe('useHederaMethods', () => {
 
   it('signs and executes transaction in one call', async () => {
     await act(async () => {
-      const res = await execute('hedera_signAndExecuteTransaction', { recipientId: '0.0.1', amount: '1' })
+      const res = await execute('hedera_signAndExecuteTransaction', {
+        recipientId: '0.0.1',
+        amount: '1',
+      })
       expect(res).toBe('tid')
     })
     expect(sendTxId).toHaveBeenCalledWith('tid')
     expect(walletProvider.hedera_signAndExecuteTransaction).toHaveBeenCalledWith({
       signerAccountId: 'hedera:testnet:0.0.1234',
-      transactionList: 'tx'
+      transactionList: 'tx',
     })
   })
 
@@ -99,6 +145,8 @@ describe('useHederaMethods', () => {
   })
 
   it('throws when executing transaction without signing first', async () => {
-    await expect(execute('hedera_executeTransaction', {})).rejects.toThrow('Transaction not signed, use hedera_signTransaction first')
+    await expect(execute('hedera_executeTransaction', {})).rejects.toThrow(
+      'Transaction not signed, use hedera_signTransaction first',
+    )
   })
 })

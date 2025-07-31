@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest'
-import { getMethodConfig, ethMethodConfigs, hederaMethodConfigs } from '../../src/utils/methodConfigs'
+import {
+  getMethodConfig,
+  ethMethodConfigs,
+  hederaMethodConfigs,
+} from '../../src/utils/methodConfigs'
 
 describe('getMethodConfig', () => {
   it('returns eth method configuration', () => {

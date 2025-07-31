@@ -3,15 +3,29 @@ import { render, act } from '@testing-library/react'
 import { describe, it, beforeEach, afterEach, expect, vi } from 'vitest'
 
 vi.mock('ethers', () => {
-  class BrowserProvider { constructor(_: any, __: any) {} }
-  class JsonRpcProvider { constructor(_: any) {} }
+  class BrowserProvider {
+    constructor(_: any, __: any) {}
+  }
+  class JsonRpcProvider {
+    constructor(_: any) {}
+  }
   class JsonRpcSigner {
     constructor(_: any, __: any) {}
-    async sendTransaction() { return { hash: 'rawHash' } }
-    async signTransaction() { return 'signedTx' }
-    async signMessage() { return 'signature' }
-    async signTypedData() { return 'typedSignature' }
-    async _signMessage() { return 'signature' }
+    async sendTransaction() {
+      return { hash: 'rawHash' }
+    }
+    async signTransaction() {
+      return 'signedTx'
+    }
+    async signMessage() {
+      return 'signature'
+    }
+    async signTypedData() {
+      return 'typedSignature'
+    }
+    async _signMessage() {
+      return 'signature'
+    }
   }
   return {
     BrowserProvider,
@@ -50,10 +64,18 @@ describe('useEthereumMethods', () => {
         sendHash,
         sendSignMsg,
       })
-      useEffect(() => { onReady(executeEthMethod) }, [executeEthMethod, onReady])
+      useEffect(() => {
+        onReady(executeEthMethod)
+      }, [executeEthMethod, onReady])
       return null
     }
-    render(<Wrapper onReady={(fn: any) => { execute = fn }} />)
+    render(
+      <Wrapper
+        onReady={(fn: any) => {
+          execute = fn
+        }}
+      />,
+    )
   }
 
   beforeEach(async () => {
@@ -79,7 +101,7 @@ describe('useEthereumMethods', () => {
           default:
             return '0x1'
         }
-      })
+      }),
     }
     walletProvider = { rpcProviders: { eip155: { httpProviders: { 1: rpcProvider } } } }
     await setup()
@@ -126,6 +148,53 @@ describe('useEthereumMethods', () => {
     })
   })
 
+  it('handles found transactions and receipts', async () => {
+    rpcProvider.request = vi.fn(async ({ method }: any) => {
+      switch (method) {
+        case 'eth_getTransactionByHash':
+          return { hash: '0x123', value: '0x1' }
+        case 'eth_getTransactionReceipt':
+          return { status: 1, transactionHash: '0x123' }
+        default:
+          return '0x1'
+      }
+    })
+
+    await act(async () => {
+      const tx = await execute('eth_getTransactionByHash', { hash: '0x1' })
+      expect(JSON.parse(tx)).toEqual({ hash: '0x123', value: '0x1' })
+    })
+
+    await act(async () => {
+      const receipt = await execute('eth_getTransactionReceipt', { hash: '0x1' })
+      expect(JSON.parse(receipt)).toEqual({ status: 1, transactionHash: '0x123' })
+    })
+  })
+
+  it('uses ethTxHash fallback when hash not provided', async () => {
+    rpcProvider.request = vi.fn(async ({ method, params }: any) => {
+      if (method === 'eth_getTransactionByHash' && params[0] === '0x123') {
+        return { hash: '0x123', from: '0xabc' }
+      }
+      if (method === 'eth_getTransactionReceipt' && params[0] === '0x123') {
+        return { status: 1, hash: '0x123' }
+      }
+      return null
+    })
+
+    await act(async () => {
+      // Test without providing hash - should use ethTxHash
+      const tx = await execute('eth_getTransactionByHash', {})
+      expect(JSON.parse(tx)).toEqual({ hash: '0x123', from: '0xabc' })
+    })
+
+    await act(async () => {
+      // Test without providing hash - should use ethTxHash
+      const receipt = await execute('eth_getTransactionReceipt', {})
+      expect(JSON.parse(receipt)).toEqual({ status: 1, hash: '0x123' })
+    })
+  })
+
   it('throws on unsupported method', async () => {
     await expect(execute('unknown', {})).rejects.toThrow('Unsupported Ethereum method')
   })
@@ -163,7 +232,29 @@ describe('useEthereumMethods', () => {
     ]
     for (const name of methods) {
       await act(async () => {
-        await execute(name, { address: '0x1', blockTag: 'latest', blockHash: 'b', index: '0', fromBlock: '0x1', toBlock: '0x2', filterId: '1', blockNumber: '0x1', data: '0x', message: 'm', to: '0x1', gasLimit: '1', value: '1', domain: 'd', version: '1', verifyingContract: '0x1', from_name: 'a', from_wallet: '0x1', to_name: 'b', to_wallet: '0x2', contents: 'c' })
+        await execute(name, {
+          address: '0x1',
+          blockTag: 'latest',
+          blockHash: 'b',
+          index: '0',
+          fromBlock: '0x1',
+          toBlock: '0x2',
+          filterId: '1',
+          blockNumber: '0x1',
+          data: '0x',
+          message: 'm',
+          to: '0x1',
+          gasLimit: '1',
+          value: '1',
+          domain: 'd',
+          version: '1',
+          verifyingContract: '0x1',
+          from_name: 'a',
+          from_wallet: '0x1',
+          to_name: 'b',
+          to_wallet: '0x2',
+          contents: 'c',
+        })
       })
     }
     expect(sendSignMsg).toHaveBeenCalled()
@@ -181,11 +272,21 @@ describe('useEthereumMethods', () => {
         sendHash,
         sendSignMsg,
       })
-      useEffect(() => { onReady(executeEthMethod) }, [executeEthMethod, onReady])
+      useEffect(() => {
+        onReady(executeEthMethod)
+      }, [executeEthMethod, onReady])
       return null
     }
-    render(<Wrapper onReady={(fn: any) => { execFn = fn }} />)
-    await expect(execFn('eth_sendTransaction', { to: '0x1', value: '1', gasLimit: '1' })).rejects.toThrow('Wallet not connected')
+    render(
+      <Wrapper
+        onReady={(fn: any) => {
+          execFn = fn
+        }}
+      />,
+    )
+    await expect(
+      execFn('eth_sendTransaction', { to: '0x1', value: '1', gasLimit: '1' }),
+    ).rejects.toThrow('Wallet not connected')
     await expect(execFn('eth_sendRawTransaction', {})).rejects.toThrow('Transaction not signed')
   })
 
@@ -201,10 +302,18 @@ describe('useEthereumMethods', () => {
         sendHash,
         sendSignMsg,
       })
-      useEffect(() => { onReady(executeEthMethod) }, [executeEthMethod, onReady])
+      useEffect(() => {
+        onReady(executeEthMethod)
+      }, [executeEthMethod, onReady])
       return null
     }
-    render(<Wrapper onReady={(fn: any) => { execFn = fn }} />)
+    render(
+      <Wrapper
+        onReady={(fn: any) => {
+          execFn = fn
+        }}
+      />,
+    )
     await act(async () => {
       const res = await execFn('eth_getBalance', { address: '0xabc' })
       expect(res).toBe('5')
@@ -238,7 +347,7 @@ describe('useEthereumMethods', () => {
         from_wallet: '0x2',
         to_name: 'Bob',
         to_wallet: '0x3',
-        contents: 'Hello'
+        contents: 'Hello',
       })
       expect(sig).toBe('typedSignature')
       expect(sendSignMsg).toHaveBeenCalledWith('typedSignature')
@@ -255,7 +364,7 @@ describe('useEthereumMethods', () => {
         from_wallet: '0x2',
         to_name: 'Bob',
         to_wallet: '0x3',
-        contents: 'Hello'
+        contents: 'Hello',
       })
       expect(sig).toBe('typedSignature')
       expect(sendSignMsg).toHaveBeenCalledWith('typedSignature')
@@ -266,7 +375,7 @@ describe('useEthereumMethods', () => {
     await act(async () => {
       const result = await execute('eth_feeHistory', {
         blockCount: '10',
-        newestBlock: 'latest'
+        newestBlock: 'latest',
       })
       expect(JSON.parse(result)).toBe('0x1')
     })
@@ -284,32 +393,96 @@ describe('useEthereumMethods', () => {
         sendHash,
         sendSignMsg,
       })
-      useEffect(() => { onReady(executeEthMethod) }, [executeEthMethod, onReady])
+      useEffect(() => {
+        onReady(executeEthMethod)
+      }, [executeEthMethod, onReady])
       return null
     }
-    render(<Wrapper onReady={(fn: any) => { execFn = fn }} />)
-    
-    await expect(execFn('eth_signTypedData_v3', {
-      domain: 'test',
-      version: '1',
-      verifyingContract: '0x1',
-      from_name: 'Alice',
-      from_wallet: '0x2',
-      to_name: 'Bob',
-      to_wallet: '0x3',
-      contents: 'Hello'
-    })).rejects.toThrow('Wallet not connected')
-    
-    await expect(execFn('eth_signTypedData_v4', {
-      domain: 'test',
-      version: '1',
-      verifyingContract: '0x1',
-      from_name: 'Alice',
-      from_wallet: '0x2',
-      to_name: 'Bob',
-      to_wallet: '0x3',
-      contents: 'Hello'
-    })).rejects.toThrow('Wallet not connected')
+    render(
+      <Wrapper
+        onReady={(fn: any) => {
+          execFn = fn
+        }}
+      />,
+    )
+
+    await expect(
+      execFn('eth_signTypedData_v3', {
+        domain: 'test',
+        version: '1',
+        verifyingContract: '0x1',
+        from_name: 'Alice',
+        from_wallet: '0x2',
+        to_name: 'Bob',
+        to_wallet: '0x3',
+        contents: 'Hello',
+      }),
+    ).rejects.toThrow('Wallet not connected')
+
+    await expect(
+      execFn('eth_signTypedData_v4', {
+        domain: 'test',
+        version: '1',
+        verifyingContract: '0x1',
+        from_name: 'Alice',
+        from_wallet: '0x2',
+        to_name: 'Bob',
+        to_wallet: '0x3',
+        contents: 'Hello',
+      }),
+    ).rejects.toThrow('Wallet not connected')
+  })
+
+  it('throws when signer missing for signing methods', async () => {
+    const mod = await import('../../src/hooks/useEthereumMethods')
+    let execFn: any
+    function Wrapper({ onReady }: any) {
+      const { executeEthMethod } = mod.useEthereumMethods({
+        walletProvider: undefined,
+        chainId: undefined,
+        address: undefined,
+        ethTxHash: '0x0',
+        sendHash,
+        sendSignMsg,
+      })
+      useEffect(() => {
+        onReady(executeEthMethod)
+      }, [executeEthMethod, onReady])
+      return null
+    }
+    render(
+      <Wrapper
+        onReady={(fn: any) => {
+          execFn = fn
+        }}
+      />,
+    )
+
+    await expect(
+      execFn('eth_signTransaction', {
+        to: '0x1',
+        value: '1',
+        gasLimit: '21000',
+      }),
+    ).rejects.toThrow('Wallet not connected')
+
+    await expect(
+      execFn('eth_signMessage', {
+        message: 'test message',
+      }),
+    ).rejects.toThrow('Wallet not connected')
+
+    await expect(
+      execFn('personal_sign', {
+        message: 'test message',
+      }),
+    ).rejects.toThrow('Wallet not connected')
+
+    await expect(
+      execFn('eth_sign', {
+        message: 'test message',
+      }),
+    ).rejects.toThrow('Wallet not connected')
   })
 
   it('handles null block responses', async () => {
@@ -323,27 +496,36 @@ describe('useEthereumMethods', () => {
           return '0x1'
       }
     })
-    
+
     await act(async () => {
-      const blockByHash = await execute('eth_getBlockByHash', { blockHash: '0x123', includeTransactions: 'false' })
+      const blockByHash = await execute('eth_getBlockByHash', {
+        blockHash: '0x123',
+        includeTransactions: 'false',
+      })
       expect(blockByHash).toBe('Block not found')
-      
-      const blockByNumber = await execute('eth_getBlockByNumber', { blockTag: 'latest', includeTransactions: 'false' })
+
+      const blockByNumber = await execute('eth_getBlockByNumber', {
+        blockTag: 'latest',
+        includeTransactions: 'false',
+      })
       expect(blockByNumber).toBe('Block not found')
     })
   })
 
   it('handles eth_getBlockByNumber with includeTransactions', async () => {
     rpcProvider.request = vi.fn(async () => ({ number: '0x1', transactions: [] }))
-    
+
     await act(async () => {
-      const result = await execute('eth_getBlockByNumber', { blockTag: 'latest', includeTransactions: 'true' })
+      const result = await execute('eth_getBlockByNumber', {
+        blockTag: 'latest',
+        includeTransactions: 'true',
+      })
       expect(result).toEqual({ number: '0x1', transactions: [] })
     })
-    
+
     expect(rpcProvider.request).toHaveBeenCalledWith({
       method: 'eth_getBlockByNumber',
-      params: ['latest', true]
+      params: ['latest', true],
     })
   })
 
@@ -352,7 +534,7 @@ describe('useEthereumMethods', () => {
       if (method === 'eth_getTransactionReceipt') return null
       return '0x1'
     })
-    
+
     await act(async () => {
       const receipt = await execute('eth_getTransactionReceipt', { hash: '0x123' })
       expect(receipt).toBe('Receipt not found')
@@ -371,20 +553,30 @@ describe('useEthereumMethods', () => {
         sendHash,
         sendSignMsg,
       })
-      useEffect(() => { onReady(executeEthMethod) }, [executeEthMethod, onReady])
+      useEffect(() => {
+        onReady(executeEthMethod)
+      }, [executeEthMethod, onReady])
       return null
     }
-    render(<Wrapper onReady={(fn: any) => { execFn = fn }} />)
-    
-    await expect(execFn('eth_signTypedData', {
-      domain: 'test',
-      version: '1',
-      verifyingContract: '0x1',
-      from_name: 'Alice',
-      from_wallet: '0x2',
-      to_name: 'Bob',
-      to_wallet: '0x3',
-      contents: 'Hello'
-    })).rejects.toThrow('Wallet not connected')
+    render(
+      <Wrapper
+        onReady={(fn: any) => {
+          execFn = fn
+        }}
+      />,
+    )
+
+    await expect(
+      execFn('eth_signTypedData', {
+        domain: 'test',
+        version: '1',
+        verifyingContract: '0x1',
+        from_name: 'Alice',
+        from_wallet: '0x2',
+        to_name: 'Bob',
+        to_wallet: '0x3',
+        contents: 'Hello',
+      }),
+    ).rejects.toThrow('Wallet not connected')
   })
 })

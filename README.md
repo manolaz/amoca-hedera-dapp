@@ -70,13 +70,15 @@ native integration.
 
 ## Agent setup
 
-The repository includes a helper script to prepare a local environment. Run the following command after cloning the project:
+The repository includes a helper script to prepare a local environment. Run the following
+command after cloning the project:
 
 ```sh
 ./agent-setup.sh
 ```
 
-This script installs npm dependencies, copies the `.env` template if needed, lints the code and builds the project.
+This script installs npm dependencies, copies the `.env` template if needed, lints the code and
+builds the project.
 
 ## Running tests with coverage
 
@@ -86,11 +88,13 @@ To generate a coverage report, run:
 npm run coverage
 ```
 
-The report will be saved in the `coverage` directory and a summary will be printed in the console.
+The report will be saved in the `coverage` directory and a summary will be printed in the
+console.
 
 ## Docker
 
-This project includes a `Dockerfile` so you can run the app in a container without installing Node.js locally.
+This project includes a `Dockerfile` so you can run the app in a container without installing
+Node.js locally.
 
 1. Build the image
 

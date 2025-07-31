@@ -134,12 +134,24 @@ export const useEthereumMethods = ({
     walletProvider && address && browserProvider
       ? new JsonRpcSigner(browserProvider, address)
       : undefined
-  const rpcProvider = walletProvider && chainId
-    ? (walletProvider.rpcProviders as unknown as Record<string, Record<string, Record<number, { request: (params: { method: string; params: unknown[] }) => Promise<unknown> }>>>)?.eip155?.httpProviders?.[chainId]
-    : {
-        request: ({ method, params }: { method: string; params: unknown[] }) =>
-          jsonRpcProvider.send(method, params as never[]),
-      }
+  const rpcProvider =
+    walletProvider && chainId
+      ? (
+          walletProvider.rpcProviders as unknown as Record<
+            string,
+            Record<
+              string,
+              Record<
+                number,
+                { request: (params: { method: string; params: unknown[] }) => Promise<unknown> }
+              >
+            >
+          >
+        )?.eip155?.httpProviders?.[chainId]
+      : {
+          request: ({ method, params }: { method: string; params: unknown[] }) =>
+            jsonRpcProvider.send(method, params as never[]),
+        }
 
   const execute = async (methodName: string, params: Record<string, string>) => {
     switch (methodName) {
@@ -230,7 +242,9 @@ export const useEthereumMethods = ({
         const p = params as unknown as EthSignMessageParams
         // eth_sign is similar to personal_sign but less secure
         // Most wallets will show a warning for eth_sign
-        const signature = await (signer as JsonRpcSigner & { _signMessage: (message: string) => Promise<string> })._signMessage(p.message)
+        const signature = await (
+          signer as JsonRpcSigner & { _signMessage: (message: string) => Promise<string> }
+        )._signMessage(p.message)
         sendSignMsg(signature)
         return signature
       }
@@ -301,7 +315,11 @@ export const useEthereumMethods = ({
         return (
           (await rpcProvider.request({
             method: 'eth_getBlockByNumber',
-            params: [p.blockTag, (p as EthGetBlockByNumberParams & { includeTransactions?: string }).includeTransactions === 'true'],
+            params: [
+              p.blockTag,
+              (p as EthGetBlockByNumberParams & { includeTransactions?: string })
+                .includeTransactions === 'true',
+            ],
           })) || 'Block not found'
         )
       }

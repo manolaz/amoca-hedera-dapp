@@ -1,10 +1,12 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this
+repository.
 
 ## Commands
 
 ### Development
+
 ```bash
 # Install dependencies
 npm install
@@ -31,13 +33,18 @@ npm run preview
 ## Architecture Overview
 
 ### Core Structure
-This is a React application that demonstrates integration with Hedera blockchain using both native Hedera APIs and Ethereum JSON-RPC compatibility layer. The app uses Reown AppKit for wallet connectivity.
+
+This is a React application that demonstrates integration with Hedera blockchain using both
+native Hedera APIs and Ethereum JSON-RPC compatibility layer. The app uses Reown AppKit for
+wallet connectivity.
 
 ### Key Integration Points
 
 1. **Dual Protocol Support**
-   - Native Hedera integration via `hedera` namespace (supports all Hedera account types and transactions)
-   - EVM compatibility via `eip155` namespace (for Ethereum-compatible wallets, ECDSA accounts only)
+   - Native Hedera integration via `hedera` namespace (supports all Hedera account types and
+     transactions)
+   - EVM compatibility via `eip155` namespace (for Ethereum-compatible wallets, ECDSA accounts
+     only)
 
 2. **Wallet Connection**
    - Uses `@hashgraph/hedera-wallet-connect` for Hedera-specific functionality
@@ -45,7 +52,8 @@ This is a React application that demonstrates integration with Hedera blockchain
    - Two adapters configured: `nativeHederaAdapter` and `eip155HederaAdapter`
 
 3. **Configuration Architecture**
-   - Central configuration in `src/config/index.ts` manages providers, adapters, and network settings
+   - Central configuration in `src/config/index.ts` manages providers, adapters, and network
+     settings
    - Environment variables required:
      - `VITE_REOWN_PROJECT_ID` (mandatory)
      - `VITE_HEDERA_RPC_URL` (optional, defaults to hgraph.io testnet)
@@ -62,18 +70,21 @@ This is a React application that demonstrates integration with Hedera blockchain
    - `ErrorBoundary`: Error handling wrapper
 
 ### Testing Strategy
+
 - Uses Vitest with React Testing Library
 - Test files located in `tests/` directory mirroring source structure
 - Coverage reporting configured with v8 provider
 - Setup file at `setupTests.ts` for test environment configuration
 
 ### Build Configuration
+
 - Vite-based build system with React plugin
 - TypeScript project with composite configuration (app + node)
 - ESM modules with polyfills for Node.js compatibility
 - Target: ESNext for modern JavaScript features
 
 ### Important Considerations
+
 - Ed25519 accounts not supported in EVM mode
 - Automatic disconnect handling for session/pairing deletions
 - Debug logging enabled for Universal Provider
@@ -94,6 +105,7 @@ Additional context about the changes.
 ```
 
 Avoid including:
+
 - "🤖 Generated with [Claude Code]" signatures
 - "Co-Authored-By: Claude" attributions
 - External links in commit messages

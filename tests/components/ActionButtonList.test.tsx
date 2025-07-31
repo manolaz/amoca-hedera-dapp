@@ -7,40 +7,62 @@ let alertMock: any
 
 function createWalletProviderMock() {
   const httpProvider = { request: vi.fn(async ({ method }: any) => method + '_result') }
-  return new Proxy({ rpcProviders: { eip155: { httpProviders: { 1: httpProvider } } } }, {
-    get(target, prop: string) {
-      if (!target[prop]) {
-        if (prop === 'hedera_signAndExecuteQuery') {
-          target[prop] = vi.fn(async () => ({ response: Buffer.from('data').toString('base64') }))
-        } else if (prop === 'hedera_getNodeAddresses') {
-          target[prop] = vi.fn(async () => ({ nodes: ['n1'] }))
-        } else if (prop === 'hedera_executeTransaction' || prop === 'hedera_signAndExecuteTransaction') {
-          target[prop] = vi.fn(async () => ({ transactionId: 'tid' }))
-        } else {
-          target[prop] = vi.fn(async () => prop + '_result')
+  return new Proxy(
+    { rpcProviders: { eip155: { httpProviders: { 1: httpProvider } } } },
+    {
+      get(target, prop: string) {
+        if (!target[prop]) {
+          if (prop === 'hedera_signAndExecuteQuery') {
+            target[prop] = vi.fn(async () => ({
+              response: Buffer.from('data').toString('base64'),
+            }))
+          } else if (prop === 'hedera_getNodeAddresses') {
+            target[prop] = vi.fn(async () => ({ nodes: ['n1'] }))
+          } else if (
+            prop === 'hedera_executeTransaction' ||
+            prop === 'hedera_signAndExecuteTransaction'
+          ) {
+            target[prop] = vi.fn(async () => ({ transactionId: 'tid' }))
+          } else {
+            target[prop] = vi.fn(async () => prop + '_result')
+          }
         }
-      }
-      return target[prop]
-    }
-  })
+        return target[prop]
+      },
+    },
+  )
 }
 
 vi.mock('ethers', () => {
   class BrowserProvider {
     constructor(_: any, __: any) {}
-    async getBalance() { return 1n }
-    async send() { return 'rawHash' }
+    async getBalance() {
+      return 1n
+    }
+    async send() {
+      return 'rawHash'
+    }
   }
   class JsonRpcSigner {
     constructor(_: any, __: any) {}
-    async sendTransaction() { return { hash: 'txHash' } }
-    async signTransaction() { return 'signedTx' }
-    async signMessage() { return 'signature' }
-    async signTypedData() { return 'typedSignature' }
+    async sendTransaction() {
+      return { hash: 'txHash' }
+    }
+    async signTransaction() {
+      return 'signedTx'
+    }
+    async signMessage() {
+      return 'signature'
+    }
+    async signTypedData() {
+      return 'typedSignature'
+    }
   }
   class JsonRpcProvider {
     constructor(_: any) {}
-    async request({ method }: any) { return method + '_result' }
+    async request({ method }: any) {
+      return method + '_result'
+    }
   }
   return {
     BrowserProvider,
@@ -54,13 +76,42 @@ vi.mock('ethers', () => {
 })
 
 vi.mock('@hashgraph/sdk', () => {
-  class Hbar { constructor(_: number) {} negated() { return this } }
-  class TransferTransaction { setTransactionId() { return this } addHbarTransfer() { return this } setMaxTransactionFee() { return this } freezeWith() { return this } }
+  class Hbar {
+    constructor(_: number) {}
+    negated() {
+      return this
+    }
+  }
+  class TransferTransaction {
+    setTransactionId() {
+      return this
+    }
+    addHbarTransfer() {
+      return this
+    }
+    setMaxTransactionFee() {
+      return this
+    }
+    freezeWith() {
+      return this
+    }
+  }
   const TransactionId = { generate: () => 'tid' }
-  class AccountInfoQuery { setAccountId() { return this } }
+  class AccountInfoQuery {
+    setAccountId() {
+      return this
+    }
+  }
   const AccountInfo = { fromBytes: () => ({}) }
   class Transaction {}
-  return { Hbar, TransferTransaction, TransactionId, AccountInfoQuery, AccountInfo, Transaction }
+  return {
+    Hbar,
+    TransferTransaction,
+    TransactionId,
+    AccountInfoQuery,
+    AccountInfo,
+    Transaction,
+  }
 })
 
 vi.mock('@hashgraph/hedera-wallet-connect', () => ({
@@ -90,7 +141,7 @@ vi.mock('../../src/components/Modal', async () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
       }, [isOpen])
       return null
-    }
+    },
   }
 })
 
@@ -210,12 +261,12 @@ describe('ActionButtonList', () => {
   it('executes methods without modal configuration directly', async () => {
     activeChain = 'eip155'
     walletProvider = createWalletProviderMock()
-    
+
     // Mock getMethodConfig to return undefined for a method (no modal needed)
     vi.doMock('../../src/utils/methodConfigs', () => ({
-      getMethodConfig: vi.fn().mockReturnValue(undefined)
+      getMethodConfig: vi.fn().mockReturnValue(undefined),
     }))
-    
+
     const { ActionButtonList } = await import('../../src/components/ActionButtonList')
     render(<ActionButtonList {...props} />)
 
@@ -233,9 +284,11 @@ describe('ActionButtonList', () => {
     activeChain = 'eip155'
     // Create a provider that throws errors
     const errorProvider = createWalletProviderMock()
-    errorProvider.rpcProviders.eip155.httpProviders[1].request = vi.fn().mockRejectedValue(new Error('Test error'))
+    errorProvider.rpcProviders.eip155.httpProviders[1].request = vi
+      .fn()
+      .mockRejectedValue(new Error('Test error'))
     walletProvider = errorProvider
-    
+
     const { ActionButtonList } = await import('../../src/components/ActionButtonList')
     render(<ActionButtonList {...props} />)
 
@@ -245,18 +298,18 @@ describe('ActionButtonList', () => {
     await waitFor(() => {
       expect(props.setLastFunctionResult).toHaveBeenCalledWith({
         functionName: 'eth_chainId',
-        result: 'Error: Test error'
+        result: 'Error: Test error',
       })
       expect(alertMock).toHaveBeenCalledWith('Error: Test error')
     })
-    
+
     consoleSpy.mockRestore()
   })
 
   it('handles disconnect errors', async () => {
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
     disconnectMock.mockRejectedValueOnce(new Error('Disconnect failed'))
-    
+
     const { ActionButtonList } = await import('../../src/components/ActionButtonList')
     render(<ActionButtonList {...props} />)
 
@@ -271,10 +324,26 @@ describe('ActionButtonList', () => {
     consoleSpy.mockRestore()
   })
 
+  it('handles successful disconnect', async () => {
+    disconnectMock.mockResolvedValueOnce(undefined)
+
+    const { ActionButtonList } = await import('../../src/components/ActionButtonList')
+    render(<ActionButtonList {...props} />)
+
+    // Click the disconnect button
+    fireEvent.click(screen.getByRole('button', { name: 'Disconnect' }))
+
+    await waitFor(() => {
+      expect(disconnectMock).toHaveBeenCalled()
+    })
+  })
+
   it('handles object results in alerts', async () => {
     // Mock a method that returns an object result
-    walletProvider.rpcProviders.eip155.httpProviders[1].request = vi.fn().mockResolvedValue({ status: 1, data: 'test' })
-    
+    walletProvider.rpcProviders.eip155.httpProviders[1].request = vi
+      .fn()
+      .mockResolvedValue({ status: 1, data: 'test' })
+
     const { ActionButtonList } = await import('../../src/components/ActionButtonList')
     render(<ActionButtonList {...props} />)
 
@@ -284,7 +353,7 @@ describe('ActionButtonList', () => {
       expect(alertMock).toHaveBeenCalledWith('{"status":1,"data":"test"}')
       expect(props.setLastFunctionResult).toHaveBeenCalledWith({
         functionName: 'eth_chainId',
-        result: '{"status":1,"data":"test"}'
+        result: '{"status":1,"data":"test"}',
       })
     })
   })
@@ -294,7 +363,7 @@ describe('ActionButtonList', () => {
     const nullProvider = createWalletProviderMock()
     nullProvider.rpcProviders.eip155.httpProviders[1].request = vi.fn().mockResolvedValue(null)
     walletProvider = nullProvider
-    
+
     const { ActionButtonList } = await import('../../src/components/ActionButtonList')
     render(<ActionButtonList {...props} />)
 
@@ -304,7 +373,29 @@ describe('ActionButtonList', () => {
       expect(alertMock).toHaveBeenCalledWith('null')
       expect(props.setLastFunctionResult).toHaveBeenCalledWith({
         functionName: 'eth_chainId',
-        result: 'null'
+        result: 'null',
+      })
+    })
+  })
+
+  it('handles undefined results', async () => {
+    // Mock a method that returns undefined
+    const undefinedProvider = createWalletProviderMock()
+    undefinedProvider.rpcProviders.eip155.httpProviders[1].request = vi
+      .fn()
+      .mockResolvedValue(undefined)
+    walletProvider = undefinedProvider
+
+    const { ActionButtonList } = await import('../../src/components/ActionButtonList')
+    render(<ActionButtonList {...props} />)
+
+    fireEvent.click(screen.getByText('eth_chainId'))
+
+    await waitFor(() => {
+      expect(alertMock).toHaveBeenCalledWith('')
+      expect(props.setLastFunctionResult).toHaveBeenCalledWith({
+        functionName: 'eth_chainId',
+        result: '',
       })
     })
   })
@@ -313,17 +404,19 @@ describe('ActionButtonList', () => {
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
     // Mock an error provider that will cause the error path to execute
     const errorProvider = createWalletProviderMock()
-    errorProvider.rpcProviders.eip155.httpProviders[1].request = vi.fn().mockRejectedValue(new Error('Test error'))
+    errorProvider.rpcProviders.eip155.httpProviders[1].request = vi
+      .fn()
+      .mockRejectedValue(new Error('Test error'))
     walletProvider = errorProvider
-    
+
     // Mock window.alert as undefined to test the window check
     const originalAlert = window.alert
     Object.defineProperty(window, 'alert', {
       value: undefined,
       writable: true,
-      configurable: true
+      configurable: true,
     })
-    
+
     const { ActionButtonList } = await import('../../src/components/ActionButtonList')
     render(<ActionButtonList {...props} />)
 
@@ -332,7 +425,7 @@ describe('ActionButtonList', () => {
     await waitFor(() => {
       expect(props.setLastFunctionResult).toHaveBeenCalledWith({
         functionName: 'eth_chainId',
-        result: 'Error: Test error'
+        result: 'Error: Test error',
       })
     })
 
@@ -340,9 +433,9 @@ describe('ActionButtonList', () => {
     Object.defineProperty(window, 'alert', {
       value: originalAlert,
       writable: true,
-      configurable: true
+      configurable: true,
     })
-    
+
     consoleSpy.mockRestore()
   })
 

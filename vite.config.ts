@@ -12,7 +12,7 @@ console.log(__dirname)
 export default defineConfig({
   plugins: [react()],
   build: {
-    target: 'esnext'
+    target: 'esnext',
   },
   resolve: {
     alias: {
@@ -43,6 +43,12 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html'],
+      thresholds: {
+        statements: 100,
+        branches: 100,
+        functions: 100,
+        lines: 100,
+      },
     },
   },
 })

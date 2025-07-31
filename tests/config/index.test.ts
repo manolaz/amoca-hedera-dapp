@@ -29,7 +29,7 @@ vi.mock('ethers', () => ({
     constructor(url: string) {
       JsonRpcProviderSpy(url)
     }
-  }
+  },
 }))
 
 beforeEach(() => {
@@ -88,15 +88,17 @@ describe('config module', () => {
   it('uses default hedera RPC URL when not provided', async () => {
     process.env.VITE_REOWN_PROJECT_ID = 'pid123'
     await import('../../src/config/index')
-    
-    expect(JsonRpcProviderSpy).toHaveBeenCalledWith('https://testnet.hedera.api.hgraph.io/v1/pk_test/rpc')
+
+    expect(JsonRpcProviderSpy).toHaveBeenCalledWith(
+      'https://testnet.hedera.api.hgraph.io/v1/pk_test/rpc',
+    )
   })
 
   it('uses custom hedera RPC URL when provided', async () => {
     process.env.VITE_REOWN_PROJECT_ID = 'pid123'
     process.env.VITE_HEDERA_RPC_URL = 'https://custom.rpc.url'
     await import('../../src/config/index')
-    
+
     expect(JsonRpcProviderSpy).toHaveBeenCalledWith('https://custom.rpc.url')
   })
 })

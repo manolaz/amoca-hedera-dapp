@@ -33,8 +33,8 @@ createAppKit({
 })
 
 export interface FunctionResult {
-  functionName: string;
-  result: string;
+  functionName: string
+  result: string
 }
 
 export function App() {
@@ -53,11 +53,17 @@ export function App() {
     }
 
     universalProvider.on('session_delete', handleDisconnect)
-    universalProvider.client.core?.pairing.events?.on('pairing_delete', handleDisconnect as (event: unknown) => void)
+    universalProvider.client.core?.pairing.events?.on(
+      'pairing_delete',
+      handleDisconnect as (event: unknown) => void,
+    )
 
     return () => {
       universalProvider.off('session_delete', handleDisconnect)
-      universalProvider.client.core?.pairing.events?.off('pairing_delete', handleDisconnect as (event: unknown) => void)
+      universalProvider.client.core?.pairing.events?.off(
+        'pairing_delete',
+        handleDisconnect as (event: unknown) => void,
+      )
     }
   }, [disconnect])
 

@@ -4,7 +4,9 @@ import '@testing-library/jest-dom/vitest'
 
 vi.mock('@reown/appkit/react', () => ({
   createAppKit: vi.fn(),
-  useDisconnect: () => ({ disconnect: vi.fn().mockRejectedValue(new TypeError('Mock disconnect error')) }),
+  useDisconnect: () => ({
+    disconnect: vi.fn().mockRejectedValue(new TypeError('Mock disconnect error')),
+  }),
 }))
 
 vi.mock('../src/components/ActionButtonList', () => ({
@@ -49,34 +51,37 @@ describe('App', () => {
   it('handles disconnect error when session has eip155 namespace', async () => {
     // Get the mocked universalProvider
     const mockUniversalProvider = (config as any).universalProvider
-    
+
     // Setup: mock a session with eip155 namespace
     mockUniversalProvider.session = {
       namespaces: {
-        eip155: {}
-      }
+        eip155: {},
+      },
     }
-    
+
     // Setup: spy on console.error
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-    
+
     render(<App />)
-    
+
     // Get the handleDisconnect function that was passed to the 'on' method
     const sessionDeleteHandler = mockUniversalProvider.on.mock.calls.find(
-      (call: any) => call[0] === 'session_delete'
+      (call: any) => call[0] === 'session_delete',
     )?.[1]
-    
+
     expect(sessionDeleteHandler).toBeDefined()
-    
+
     // Trigger the disconnect handler
     await sessionDeleteHandler()
-    
+
     // Verify error was logged
-    expect(consoleSpy).toHaveBeenCalledWith('Failed to auto disconnect:', expect.objectContaining({
-      message: 'Mock disconnect error'
-    }))
-    
+    expect(consoleSpy).toHaveBeenCalledWith(
+      'Failed to auto disconnect:',
+      expect.objectContaining({
+        message: 'Mock disconnect error',
+      }),
+    )
+
     consoleSpy.mockRestore()
   })
 })
