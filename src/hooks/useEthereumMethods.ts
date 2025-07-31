@@ -12,6 +12,7 @@ import {
 } from 'ethers'
 import { HederaProvider } from '@hashgraph/hedera-wallet-connect'
 import { eip712Types } from '../utils/eip712'
+import { toEvmAddress } from '../utils/hedera'
 import { jsonRpcProvider } from '../config'
 
 export interface EthSendTransactionParams {
@@ -178,7 +179,7 @@ export const useEthereumMethods = ({
         if (!signer) throw new Error('Wallet not connected')
         const p = params as unknown as EthSendTransactionParams
         const tx = {
-          to: p.to,
+          to: toEvmAddress(p.to),
           value: parseEther(p.value),
           gasLimit: getBigInt(p.gasLimit),
         }
@@ -190,7 +191,7 @@ export const useEthereumMethods = ({
         if (!signer) throw new Error('Wallet not connected')
         const p = params as unknown as EthSendTransactionParams
         const tx = {
-          to: p.to,
+          to: toEvmAddress(p.to),
           value: parseEther(p.value),
           gasLimit: getBigInt(p.gasLimit),
         }
