@@ -75,8 +75,8 @@ vi.mock('@hashgraph/hedera-wallet-connect', () => ({
   hederaNamespace: 'hedera',
 }))
 
-vi.mock('../../src/components/Modal', () => {
-  const React = require('react')
+vi.mock('../../src/components/Modal', async () => {
+  const React = await import('react')
   return {
     Modal: ({ isOpen, onSubmit, fields }: any) => {
       React.useEffect(() => {
@@ -87,6 +87,7 @@ vi.mock('../../src/components/Modal', () => {
           })
           onSubmit(params)
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
       }, [isOpen])
       return null
     }

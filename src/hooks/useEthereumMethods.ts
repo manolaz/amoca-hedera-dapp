@@ -70,7 +70,7 @@ export interface EthGetLogsParams {
   fromBlock: string
   toBlock: string
 }
-export interface EthNewFilterParams extends EthGetLogsParams {}
+export type EthNewFilterParams = EthGetLogsParams
 export interface EthUninstallFilterParams {
   filterId: string
 }
@@ -135,10 +135,10 @@ export const useEthereumMethods = ({
       ? new JsonRpcSigner(browserProvider, address)
       : undefined
   const rpcProvider = walletProvider && chainId
-    ? (walletProvider.rpcProviders as any)?.eip155?.httpProviders?.[chainId]
+    ? (walletProvider.rpcProviders as unknown as Record<string, Record<string, Record<number, { request: (params: { method: string; params: unknown[] }) => Promise<unknown> }>>>)?.eip155?.httpProviders?.[chainId]
     : {
         request: ({ method, params }: { method: string; params: unknown[] }) =>
-          jsonRpcProvider.send(method, params as any),
+          jsonRpcProvider.send(method, params as never[]),
       }
 
   const execute = async (methodName: string, params: Record<string, string>) => {
@@ -146,9 +146,9 @@ export const useEthereumMethods = ({
       case 'eth_getBalance': {
         const balance = await rpcProvider.request({
           method: 'eth_getBalance',
-          params: [(params as any).address, 'latest'],
+          params: [(params as Record<string, string>).address, 'latest'],
         })
-        return formatEther(getBigInt(balance as any))
+        return formatEther(getBigInt(balance as BigNumberish))
       }
       case 'eth_chainId': {
         return await rpcProvider.request({ method: 'eth_chainId', params: [] })
@@ -158,7 +158,7 @@ export const useEthereumMethods = ({
           method: 'eth_blockNumber',
           params: [],
         })
-        return getBigInt(bn as any)
+        return getBigInt(bn as BigNumberish)
       }
       case 'eth_feeHistory': {
         const p = params as unknown as EthFeeHistoryParams
@@ -230,7 +230,7 @@ export const useEthereumMethods = ({
         const p = params as unknown as EthSignMessageParams
         // eth_sign is similar to personal_sign but less secure
         // Most wallets will show a warning for eth_sign
-        const signature = await (signer as any)._signMessage(p.message)
+        const signature = await (signer as JsonRpcSigner & { _signMessage: (message: string) => Promise<string> })._signMessage(p.message)
         sendSignMsg(signature)
         return signature
       }
@@ -269,7 +269,7 @@ export const useEthereumMethods = ({
           method: 'eth_getTransactionCount',
           params: [address, 'latest'],
         })
-        return getBigInt(count as any)
+        return getBigInt(count as BigNumberish)
       }
       case 'eth_getTransactionReceipt': {
         const p = params as unknown as EthGetTransactionByHashParams
@@ -285,7 +285,7 @@ export const useEthereumMethods = ({
           method: 'eth_maxPriorityFeePerGas',
           params: [],
         })
-        return getBigInt(fee as any)
+        return getBigInt(fee as BigNumberish)
       }
       case 'eth_getBlockByHash': {
         const p = params as unknown as EthGetBlockByHashParams
@@ -301,7 +301,7 @@ export const useEthereumMethods = ({
         return (
           (await rpcProvider.request({
             method: 'eth_getBlockByNumber',
-            params: [p.blockTag, (p as any).includeTransactions === 'true'],
+            params: [p.blockTag, (p as EthGetBlockByNumberParams & { includeTransactions?: string }).includeTransactions === 'true'],
           })) || 'Block not found'
         )
       }
@@ -311,7 +311,7 @@ export const useEthereumMethods = ({
           method: 'eth_getBlockTransactionCountByHash',
           params: [p.blockHash],
         })
-        return getBigInt(count as any)
+        return getBigInt(count as BigNumberish)
       }
       case 'eth_getBlockTransactionCountByNumber': {
         const p = params as unknown as EthGetBlockTransactionCountByNumberParams
@@ -319,7 +319,7 @@ export const useEthereumMethods = ({
           method: 'eth_getBlockTransactionCountByNumber',
           params: [p.blockTag],
         })
-        return getBigInt(count as any)
+        return getBigInt(count as BigNumberish)
       }
       case 'eth_getFilterLogs': {
         const p = params as unknown as EthFilterParams

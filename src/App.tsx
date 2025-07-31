@@ -53,11 +53,11 @@ export function App() {
     }
 
     universalProvider.on('session_delete', handleDisconnect)
-    universalProvider.client.core?.pairing.events?.on('pairing_delete', handleDisconnect as any)
+    universalProvider.client.core?.pairing.events?.on('pairing_delete', handleDisconnect as (event: unknown) => void)
 
     return () => {
       universalProvider.off('session_delete', handleDisconnect)
-      universalProvider.client.core?.pairing.events?.off('pairing_delete', handleDisconnect as any)
+      universalProvider.client.core?.pairing.events?.off('pairing_delete', handleDisconnect as (event: unknown) => void)
     }
   }, [disconnect])
 

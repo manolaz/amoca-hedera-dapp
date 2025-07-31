@@ -33,13 +33,14 @@ export const InfoList = ({ hash, txId, signedMsg, nodes, lastFunctionResult }: I
       if (!walletProvider || chainId === undefined) return
       if (isEthChain && hash) {
         try {
-          const rpcProvider = (walletProvider.rpcProviders as any)?.eip155?.httpProviders?.[chainId as number]
+          const rpcProvider = (walletProvider.rpcProviders as unknown as Record<string, Record<string, Record<number, { request: (params: { method: string; params: unknown[] }) => Promise<unknown> }>>>)?.eip155?.httpProviders?.[chainId as number]
           const receipt = await rpcProvider.request({
             method: 'eth_getTransactionReceipt',
             params: [hash],
           })
+          const receiptWithStatus = receipt as { status?: number } | null
           setStatusEthTx(
-            receipt?.status === 1 ? 'Success' : receipt?.status === 0 ? 'Failed' : 'Pending',
+            receiptWithStatus?.status === 1 ? 'Success' : receiptWithStatus?.status === 0 ? 'Failed' : 'Pending',
           )
         } catch (err) {
           console.error('Error checking transaction status:', err)
