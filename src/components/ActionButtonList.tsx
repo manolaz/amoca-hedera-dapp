@@ -165,9 +165,13 @@ export const ActionButtonList = ({
             </div>
             <div>
               {createMethodButton('eth_signMessage')}
+              {createMethodButton('personal_sign')}
+              {createMethodButton('eth_sign')}
               {createMethodButton('eth_signTransaction')}
               {createMethodButton('eth_sendTransaction')}
               {createMethodButton('eth_signTypedData')}
+              {createMethodButton('eth_signTypedData_v3')}
+              {createMethodButton('eth_signTypedData_v4')}
               {createMethodButton('eth_sendRawTransaction')}
             </div>
           </>

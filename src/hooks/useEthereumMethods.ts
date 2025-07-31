@@ -216,6 +216,24 @@ export const useEthereumMethods = ({
         sendSignMsg(signature)
         return signature
       }
+      case 'personal_sign': {
+        if (!signer) throw new Error('Wallet not connected')
+        const p = params as unknown as EthSignMessageParams
+        // personal_sign expects the message as the first param and address as second
+        // but we handle it the same way as eth_signMessage
+        const signature = await signer.signMessage(p.message)
+        sendSignMsg(signature)
+        return signature
+      }
+      case 'eth_sign': {
+        if (!signer) throw new Error('Wallet not connected')
+        const p = params as unknown as EthSignMessageParams
+        // eth_sign is similar to personal_sign but less secure
+        // Most wallets will show a warning for eth_sign
+        const signature = await (signer as any)._signMessage(p.message)
+        sendSignMsg(signature)
+        return signature
+      }
       case 'eth_call': {
         const p = params as unknown as EthCallParams
         return rpcProvider.request({
@@ -392,6 +410,52 @@ export const useEthereumMethods = ({
           to: { name: p.to_name, wallet: p.to_wallet },
           contents: p.contents,
         }
+        const signature = await signer.signTypedData(
+          domain,
+          eip712Types as unknown as Record<string, TypedDataField[]>,
+          value,
+        )
+        sendSignMsg(signature)
+        return signature
+      }
+      case 'eth_signTypedData_v3': {
+        if (!signer) throw new Error('Wallet not connected')
+        const p = params as unknown as EthSignTypedDataParams
+        const domain = {
+          name: p.domain,
+          version: p.version,
+          chainId,
+          verifyingContract: p.verifyingContract,
+        }
+        const value = {
+          from: { name: p.from_name, wallet: p.from_wallet },
+          to: { name: p.to_name, wallet: p.to_wallet },
+          contents: p.contents,
+        }
+        // v3 uses the same method as v4 in ethers
+        const signature = await signer.signTypedData(
+          domain,
+          eip712Types as unknown as Record<string, TypedDataField[]>,
+          value,
+        )
+        sendSignMsg(signature)
+        return signature
+      }
+      case 'eth_signTypedData_v4': {
+        if (!signer) throw new Error('Wallet not connected')
+        const p = params as unknown as EthSignTypedDataParams
+        const domain = {
+          name: p.domain,
+          version: p.version,
+          chainId,
+          verifyingContract: p.verifyingContract,
+        }
+        const value = {
+          from: { name: p.from_name, wallet: p.from_wallet },
+          to: { name: p.to_name, wallet: p.to_wallet },
+          contents: p.contents,
+        }
+        // v4 is the standard implementation
         const signature = await signer.signTypedData(
           domain,
           eip712Types as unknown as Record<string, TypedDataField[]>,
