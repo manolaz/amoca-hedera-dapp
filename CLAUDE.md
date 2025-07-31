@@ -78,3 +78,22 @@ This is a React application that demonstrates integration with Hedera blockchain
 - Automatic disconnect handling for session/pairing deletions
 - Debug logging enabled for Universal Provider
 - Light theme enforced, analytics enabled, social features disabled
+
+## Commit Message Format
+
+When creating commits, use clear, descriptive messages without AI attribution. Example format:
+
+```
+Add feature description
+
+- Bullet point of key changes
+- Another important change
+- Technical improvements made
+
+Additional context about the changes.
+```
+
+Avoid including:
+- "🤖 Generated with [Claude Code]" signatures
+- "Co-Authored-By: Claude" attributions
+- External links in commit messages
