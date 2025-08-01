@@ -180,6 +180,7 @@ describe('ActionButtonList', () => {
     sendNodeAddresses: vi.fn(),
     ethTxHash: '0x123',
     setLastFunctionResult: vi.fn(),
+    onDisconnect: vi.fn(),
   }
 
   it('executes all ethereum methods', async () => {
@@ -319,6 +320,8 @@ describe('ActionButtonList', () => {
     await waitFor(() => {
       expect(disconnectMock).toHaveBeenCalled()
       expect(consoleSpy).toHaveBeenCalledWith('Failed to disconnect:', expect.any(Error))
+      // onDisconnect should NOT be called when disconnect fails
+      expect(props.onDisconnect).not.toHaveBeenCalled()
     })
 
     consoleSpy.mockRestore()
@@ -335,6 +338,7 @@ describe('ActionButtonList', () => {
 
     await waitFor(() => {
       expect(disconnectMock).toHaveBeenCalled()
+      expect(props.onDisconnect).toHaveBeenCalled()
     })
   })
 
@@ -453,5 +457,42 @@ describe('ActionButtonList', () => {
 
     // Should still render buttons
     expect(screen.getByText('eth_chainId')).toBeInTheDocument()
+  })
+
+  it('handles successful disconnect without onDisconnect callback', async () => {
+    // Reset modules to ensure proper mocking
+    vi.resetModules()
+    
+    // Mock as connected to show disconnect button
+    vi.doMock('@reown/appkit/react', () => ({
+      useDisconnect: () => ({ disconnect: disconnectMock }),
+      useAppKitAccount: () => ({ isConnected: true, address: '0xabc' }),
+      useAppKitNetworkCore: () => ({ chainId: 1 }),
+      useAppKitState: () => ({ activeChain: 'eip155' }),
+      useAppKitProvider: () => ({ walletProvider: createWalletProviderMock() }),
+    }))
+    
+    disconnectMock.mockResolvedValueOnce(undefined)
+
+    const propsWithoutOnDisconnect = {
+      sendHash: vi.fn(),
+      sendTxId: vi.fn(),
+      sendSignMsg: vi.fn(),
+      sendNodeAddresses: vi.fn(),
+      ethTxHash: '0x123',
+      setLastFunctionResult: vi.fn(),
+      // onDisconnect is not provided
+    }
+
+    const { ActionButtonList } = await import('../../src/components/ActionButtonList')
+    render(<ActionButtonList {...propsWithoutOnDisconnect} />)
+
+    // Click the disconnect button
+    fireEvent.click(screen.getByRole('button', { name: 'Disconnect' }))
+
+    await waitFor(() => {
+      expect(disconnectMock).toHaveBeenCalled()
+      // Should not throw error when onDisconnect is not provided
+    })
   })
 })

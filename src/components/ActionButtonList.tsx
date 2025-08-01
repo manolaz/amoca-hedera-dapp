@@ -21,6 +21,7 @@ interface ActionButtonListProps {
   sendNodeAddresses: (nodes: string[]) => void
   ethTxHash: string
   setLastFunctionResult: (result: FunctionResult | null) => void
+  onDisconnect?: () => void
 }
 
 export const ActionButtonList = ({
@@ -30,6 +31,7 @@ export const ActionButtonList = ({
   sendNodeAddresses,
   ethTxHash,
   setLastFunctionResult,
+  onDisconnect,
 }: ActionButtonListProps) => {
   const { disconnect } = useDisconnect()
   const { chainId } = useAppKitNetworkCore()
@@ -64,6 +66,10 @@ export const ActionButtonList = ({
   const handleDisconnect = async () => {
     try {
       await disconnect()
+      // Call the onDisconnect callback to clear UI state
+      if (onDisconnect) {
+        onDisconnect()
+      }
     } catch (error) {
       console.error('Failed to disconnect:', error)
     }

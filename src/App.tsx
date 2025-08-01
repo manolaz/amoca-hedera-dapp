@@ -45,11 +45,20 @@ export function App() {
   const [nodes, setNodes] = useState<string[]>([])
   const [lastFunctionResult, setLastFunctionResult] = useState<FunctionResult | null>(null)
 
+  const clearState = () => {
+    setTransactionHash('')
+    setTransactionId('')
+    setSignedMsg('')
+    setNodes([])
+    setLastFunctionResult(null)
+  }
+
   useEffect(() => {
     const handleDisconnect = () => {
       if (universalProvider.session?.namespaces?.eip155) {
         disconnect().catch((err) => console.error('Failed to auto disconnect:', err))
       }
+      clearState()
     }
 
     universalProvider.on('session_delete', handleDisconnect)
@@ -81,6 +90,7 @@ export function App() {
         sendSignMsg={setSignedMsg}
         sendNodeAddresses={setNodes}
         setLastFunctionResult={setLastFunctionResult}
+        onDisconnect={clearState}
       />
       <div className="advice">
         <p>
